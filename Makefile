@@ -1,0 +1,38 @@
+#TESTS = test/node/couch_api.js
+#TESTS = test/node/db_api.js
+#TESTS = test/node/query_opts.js
+#TESTS = test/node/view_api.js
+TESTS = test/node/*.js
+#REPORTER = dot
+REPORTER = spec
+
+all: relax.js test
+
+relax.js: components index.js test/node/*.js
+	@component build \
+		--standalone relax \
+		--out . --name relax
+
+test:
+	@NODE_ENV=test ./node_modules/.bin/mocha \
+		--require should \
+		--reporter $(REPORTER) \
+		--timeout 2000 \
+		$(TESTS)
+
+# build: components index.js test
+# 	@component build --dev
+
+components: component.json
+	@component install --dev
+
+clean:
+	rm -fr build components template.js relax.js
+
+# test:
+# 	@mocha-phantomjs test/index.html
+
+
+.PHONY: test
+
+#		--growl \

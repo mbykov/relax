@@ -1,0 +1,29 @@
+//
+var Relax = require('../../');
+
+// describe('Relax', function(){
+//     describe('Database object', function(){
+//         it('should be created by database method', function(done){
+//             var relax = new Relax;
+//             var db = relax.database('test');
+//             db.db.should.equal("/test");
+//             //db.href.should.equal('http://localhost:5984/test');
+//             done();
+//         })
+//     })
+// })
+
+describe('Relax', function(){
+    console.log("=== _all_dbs: ===");
+    describe('couch API', function(){
+        it('should list all_dbs', function(done){
+            var relax = new Relax;
+            relax.all_dbs(function(err, res){
+                console.log("errs: " + err.text);
+                console.log("_all_dbs: " + res.text);
+                true.should.be.true;
+                done();
+            });
+        })
+    })
+})

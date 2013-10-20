@@ -1,0 +1,19 @@
+{
+  "name": "relax",
+  "description": "superagent on a couch",
+  "version": "0.0.1",
+  "dependencies": {
+      "url": "*",
+      "underscore":"*",
+      "superagent": "*"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "component": {
+    "scripts": {
+      "relax": "index.js"
+    }
+  }
+}
