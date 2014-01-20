@@ -6,9 +6,13 @@ TESTS = test/node/*.js
 #REPORTER = dot
 REPORTER = spec
 
-all: relax.js test
+build: components index.js #test
+	@component build --dev
 
-relax.js: components index.js test/node/*.js
+components: component.json
+	@component install --dev
+
+relax: components index.js test/node/*.js
 	@component build \
 		--standalone relax \
 		--out . --name relax
@@ -19,12 +23,6 @@ test:
 		--reporter $(REPORTER) \
 		--timeout 2000 \
 		$(TESTS)
-
-# build: components index.js test
-# 	@component build --dev
-
-components: component.json
-	@component install --dev
 
 clean:
 	rm -fr build components template.js relax.js

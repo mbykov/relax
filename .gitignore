@@ -1,6 +1,10 @@
 components
 build
+.todo.org
 node_modules
 log
-.git
+Junk
+client
+eproject.cfg
+
 

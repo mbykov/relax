@@ -4,11 +4,11 @@
   "description": "superagent-on-a-couch",
   "version": "0.0.1",
   "keywords": [],
-  "dependencies": {
-    "visionmedia/superagent": "*",
-    "component/url": "*",
-    "component/underscore": "*"
-  },
+    "dependencies": {
+        "visionmedia/superagent": "*",
+        "yields/opts": "*",
+        "component/url": "*"
+    },
   "license": "MIT",
   "main": "index.js",
   "scripts": [
