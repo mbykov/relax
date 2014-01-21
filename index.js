@@ -3,10 +3,11 @@
 var url = require('url');
 //var opts = require('opts');
 //var _ = require('underscore');
-// var request = require('superagent');
+//var request = require('superagent');
 // var noop = function() {};
+//var inherit = require('inherit');
 
-module.exports = relax;
+module.exports = Relax;
 
 console.log('KU zero');
 
@@ -14,13 +15,47 @@ console.log('KU zero');
  * Initialize `Relax`
  */
 
-function relax() {
-    if (!(this instanceof relax)) return new relax();
+function Relax() {
+    //if (!(this instanceof relax)) return new relax();
     console.log('KU relax');
-    this.opts = opts({port:5984, host: '127.0.0.1'});
+    this.opts = opts({port:5984, host: '127.0.0.1', protocol: 'http:'});
     log('O', this.opts())
-    return this;
+    var request = require('superagent');
+    request.jumps = 10;
+    return request;
 }
+
+Relax.prototype.database = function(cb) {
+    request
+        .get('/search')
+        .set('API-Key', 'foobar')
+        .set('Accept', 'application/json')
+        .end(cb);
+};
+
+//relax.prototype = request; //.prototype;
+
+//log('G', relax.prototype.toSource) // .__proto__
+log('GET', Relax.jumps)
+
+//inherit(relax, request);
+
+/*
+  методы request повторить здесь через prototype
+  сформировать opts.base & opts.path - прочитать url, querystring, etc
+  в SA вообще нет указания на host
+  и добавить к SA новые методы .db, .view, что там еще, т.е.
+  relax.get()
+  relax
+     .db('latin')
+     .ddoc('mydoc')
+     .view('myview')
+     .end(cb)
+*/
+
+//Package.prototype.__proto__ = Emitter.prototype;
+
+
 
 // function Relax_(par) {
 //     var opts = {};
@@ -149,6 +184,8 @@ function relax() {
 
 function log () { console.log.apply(console, arguments) }
 
+// почему-то не могу получить эти модули
+
 function opts(obj) {
     return (function (key, val) {
         switch (arguments.length) {
@@ -158,3 +195,10 @@ function opts(obj) {
         }
     });
 }
+
+function inherit(a, b){
+    var fn = function(){};
+    fn.prototype = b.prototype;
+    a.prototype = new fn;
+    a.prototype.constructor = a;
+};
