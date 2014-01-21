@@ -4,12 +4,13 @@
   "version": "0.0.1",
   "dependencies": {
       "url": "*",
-      "underscore":"*",
       "superagent": "*"
   },
   "devDependencies": {
-    "mocha": "*",
-    "should": "*"
+      "express": "*",
+      "better-assert": "*",
+      "mocha": "*",
+      "should": "*"
   },
   "component": {
     "scripts": {

@@ -1,8 +1,7 @@
 //var Emitter = require('..');
 
 var request = require('superagent');
-var Relax = require('../');
-var relax = new Relax();
+var relax = require('../')();
 
 // //relax.set({ 'API-Key': 'foobar', Accept: 'application/json' });
 
@@ -38,3 +37,5 @@ relax.get(url, function(err, res){
 // })
 
 function log () { console.log.apply(console, arguments) }
+
+//var relax = new Relax();

@@ -5,7 +5,6 @@ var url = require('url');
 //var _ = require('underscore');
 //var request = require('superagent');
 // var noop = function() {};
-//var inherit = require('inherit');
 
 module.exports = Relax;
 
@@ -16,7 +15,7 @@ console.log('KU zero');
  */
 
 function Relax() {
-    //if (!(this instanceof relax)) return new relax();
+    if (!(this instanceof Relax)) return new Relax();
     console.log('KU relax');
     this.opts = opts({port:5984, host: '127.0.0.1', protocol: 'http:'});
     log('O', this.opts())
@@ -25,25 +24,22 @@ function Relax() {
     return request;
 }
 
-Relax.prototype.database = function(cb) {
-    request
-        .get('/search')
-        .set('API-Key', 'foobar')
-        .set('Accept', 'application/json')
-        .end(cb);
-};
+// Relax.prototype.database = function(cb) {
+//     request
+//         .get('/search')
+//         .set('API-Key', 'foobar')
+//         .set('Accept', 'application/json')
+//         .end(cb);
+// };
 
 //relax.prototype = request; //.prototype;
 
 //log('G', relax.prototype.toSource) // .__proto__
 log('GET', Relax.jumps)
 
-//inherit(relax, request);
 
 /*
-  методы request повторить здесь через prototype
-  сформировать opts.base & opts.path - прочитать url, querystring, etc
-  в SA вообще нет указания на host
+  сформировать opts.base & opts.path - прочитать url, querystring, etc - или где в SA хранятся параметры?
   и добавить к SA новые методы .db, .view, что там еще, т.е.
   relax.get()
   relax
@@ -184,8 +180,7 @@ log('GET', Relax.jumps)
 
 function log () { console.log.apply(console, arguments) }
 
-// почему-то не могу получить эти модули
-
+// почему-то не могу получить модуль opts
 function opts(obj) {
     return (function (key, val) {
         switch (arguments.length) {
@@ -196,6 +191,7 @@ function opts(obj) {
     });
 }
 
+//inherit(relax, request);
 function inherit(a, b){
     var fn = function(){};
     fn.prototype = b.prototype;
