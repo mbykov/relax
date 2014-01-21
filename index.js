@@ -6,6 +6,8 @@ var url = require('url');
 //var request = require('superagent');
 // var noop = function() {};
 
+var request = require('superagent');
+
 module.exports = Relax;
 
 console.log('KU zero');
@@ -15,14 +17,37 @@ console.log('KU zero');
  */
 
 function Relax() {
-    if (!(this instanceof Relax)) return new Relax();
+    //if (!(this instanceof Relax)) return new Relax();
     console.log('KU relax');
     this.opts = opts({port:5984, host: '127.0.0.1', protocol: 'http:'});
     log('O', this.opts())
-    var request = require('superagent');
     request.jumps = 10;
+    request.dbname = dbname;
+    //request.constructor = arguments.callee
+    //var rr  = request('/latin');
+    //log('RRR', rr)
     return request;
+    //return request;
 }
+
+//Relax.prototype.dbname = function(name) {
+function dbname(name) {
+    name= (name[0] === '/') ? name : ('/' + name);
+    log('II', this instanceof Relax)
+    var path = url.parse('http://localhost:5984/latin');
+    //request.url = 'http://localhost:5984/' + name;
+    return request.get(path);
+};
+
+// request.get = function(url, data, fn){
+//     var req = request('GET', url);
+//     if ('function' == typeof data) fn = data, data = null;
+//     if (data) req.query(data);
+//     if (fn) req.end(fn);
+//     return req;
+// };
+
+/* теперь я хочу написать prototype, чтобы прописался параметр ._dbname, и 2) err если такой нет */
 
 // Relax.prototype.database = function(cb) {
 //     request
