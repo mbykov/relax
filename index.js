@@ -5,49 +5,47 @@ var url = require('url');
 //var _ = require('underscore');
 //var request = require('superagent');
 // var noop = function() {};
-
 var request = require('superagent');
 
-module.exports = Relax;
-
-console.log('KU zero');
+module.exports = Relax();
 
 /**
  * Initialize `Relax`
  */
 
 function Relax() {
-    //if (!(this instanceof Relax)) return new Relax();
-    console.log('KU relax');
-    this.opts = opts({port:5984, host: '127.0.0.1', protocol: 'http:'});
-    log('O', this.opts())
-    request.jumps = 10;
+    if (!(this instanceof Relax)) return new Relax();
+    // this.opts = opts({port:5984, host: '127.0.0.1', protocol: 'http:'});
+    // log('O', this.opts())
+    // TODO: что же, вот так тупо перечислять методы?
     request.dbname = dbname;
-    //request.constructor = arguments.callee
-    //var rr  = request('/latin');
-    //log('RRR', rr)
     return request;
-    //return request;
 }
 
-//Relax.prototype.dbname = function(name) {
 function dbname(name) {
     name= (name[0] === '/') ? name : ('/' + name);
-    log('II', this instanceof Relax)
+    //log('II=======', this instanceof request)
     var path = url.parse('http://localhost:5984/latin');
-    //request.url = 'http://localhost:5984/' + name;
     return request.get(path);
 };
 
-// request.get = function(url, data, fn){
-//     var req = request('GET', url);
-//     if ('function' == typeof data) fn = data, data = null;
-//     if (data) req.query(data);
-//     if (fn) req.end(fn);
-//     return req;
-// };
+function allDbs() {
+    var path = url.parse('http://localhost:5984/_all_dbs');
+    // FIXME: тут нужен .end
+    return request.get(path);
+}
 
-/* теперь я хочу написать prototype, чтобы прописался параметр ._dbname, и 2) err если такой нет */
+function getVersion() {
+    request
+}
+
+/*
+
+   блестяще. Теперь - err, view, err,
+   методы DB, вообще - копировать jq.couch по шагам
+
+
+теперь я хочу написать prototype, чтобы прописался параметр ._dbname, и 2) err если такой нет */
 
 // Relax.prototype.database = function(cb) {
 //     request
@@ -56,12 +54,6 @@ function dbname(name) {
 //         .set('Accept', 'application/json')
 //         .end(cb);
 // };
-
-//relax.prototype = request; //.prototype;
-
-//log('G', relax.prototype.toSource) // .__proto__
-log('GET', Relax.jumps)
-
 
 /*
   сформировать opts.base & opts.path - прочитать url, querystring, etc - или где в SA хранятся параметры?

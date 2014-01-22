@@ -4,8 +4,8 @@ var express = require('express');
 var assert = require('better-assert');
 var app = express();
 var url = require('url');
-var Relax = require('../../');
-var relax = new Relax();
+var relax = require('../../');
+//var relax = new Relax();
 
 app.get('/login', function(req, res){
     res.send('<form id="login"></form>');
@@ -19,30 +19,27 @@ describe('relax', function(){
             relax
                 .get(url.parse('http://localhost:5985/login'))
                 .end(function(res){
-                    //log('RES', res)
-                    //log('URL', url.parse('http://localhost:5984/latin_'))
                     //log('RES-KEY', Object.keys(res))
                     assert(res.ok);
                     done();
                 })
         })
     })
-})
 
-
-describe('relax', function(){
     describe('with an object', function(){
         it('should set dbname', function(done){
             relax
                 .dbname('latin')
                 .end(function(res){
-                    //log('RES', res)
-                    //assert(res.ok);
+                    log('RES', res.text)
                     done();
                 })
         })
     })
+
 })
+
+
 
 function log () { console.log.apply(console, arguments) }
 
