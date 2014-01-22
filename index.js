@@ -5,9 +5,8 @@ var url = require('url');
 //var _ = require('underscore');
 //var request = require('superagent');
 // var noop = function() {};
-var request = require('superagent');
 
-module.exports = Relax();
+module.exports = Relax;
 
 /**
  * Initialize `Relax`
@@ -17,27 +16,60 @@ function Relax() {
     if (!(this instanceof Relax)) return new Relax();
     // this.opts = opts({port:5984, host: '127.0.0.1', protocol: 'http:'});
     // log('O', this.opts())
-    // request.dbname = dbname;
-    // request.allDbs = allDbs;
-    // TODO: classMethods, instMethods ?
-    [dbname, allDbs].forEach(function(method) {
-        request[method.name] = method;
-    })
-    return request;
+    this.host = 'localhost';
+    this.port = 5984;
+    // request.dbname = this.dbname;
+    // request.ddoc = this.ddoc;
+    // //request.dbname = this.dbname.bind(this);
+    // //request.dbname = request.get;
+    // log('==O==', Object.keys(request))
+    // // request.allDbs = allDbs;
+
+    // // [dbname, allDbs, activeTasks, info].forEach(function(method) {
+    // //     request[method.name] = method;
+    // // })
+    return this;
 }
 
-function dbname(name) {
-    name= (name[0] === '/') ? name : ('/' + name);
-    //log('II=======', this instanceof request)
-    var path = url.parse('http://localhost:5984/latin');
-    return request.get(path);
+Relax.prototype.dbname = function(name){
+    name = (name[0] === '/') ? name : ('/' + name);
+    var path = url.parse('http://localhost:5984/' + name);
+    this.path = path;
+    return this;
 };
+
+Relax.prototype.ddoc = function(name){
+    this.view = name;
+    return this;
+};
+
+Relax.prototype.end = function(cb){
+    var request = require('superagent');
+    var path = url.parse('http://localhost:5984/greek');
+    request.get(path, cb);
+};
+
 
 function allDbs() {
     var path = url.parse('http://localhost:5984/_all_dbs');
-    // FIXME: тут нужен .end
+    // FIXME: тут нужен .end ?
     return request.get(path);
 }
+
+function activeTasks() {
+    var path = url.parse('http://localhost:5984/_active_tasks');
+    return request.get(path);
+}
+
+function info_ok(cb) {
+    var path = url.parse('http://localhost:5984/latin');
+    return request.get(path).end(cb);
+};
+
+function info(cb) {
+    //var path = url.parse('http://localhost:5984/latin');
+    return request.get(request.path, cb); //.end(cb);
+};
 
 function getVersion() {
     request
