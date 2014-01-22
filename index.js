@@ -30,8 +30,39 @@ function Relax() {
 
 Relax.prototype.allDbs = function(cb){
     var path = url.parse('http://localhost:5984/_all_dbs');
-    request.get(path, cb);
+    //request.get(path, cb);
+    request.get(path, function(res){cb(res.text)});
 };
+
+Relax.prototype.config = function(cb){
+    var path = url.parse('http://localhost:5984/_config');
+    request.get(path, function(res){cb(res.text)});
+};
+
+Relax.prototype.info = function(cb){
+    var path = url.parse('http://localhost:5984/');
+    request.get(path, function(res){cb(res.text)});
+};
+
+Relax.prototype.stats = function(cb){
+    var path = url.parse('http://localhost:5984/_stats');
+    request.get(path, function(res){cb(res.text)});
+};
+
+Relax.prototype.activeTasks = function(cb){
+    var path = url.parse('http://localhost:5984/_active_tasks');
+    request.get(path, function(res){cb(res.text)});
+};
+
+Relax.prototype.uuids = function(count, cb){
+    if (typeof count === 'function') callback = count, count = null;
+    // FIXME: query - см cradle
+    var path = url.parse('http://localhost:5984/_uuids');
+    request.get(path, function(res){cb(res.text)});
+};
+
+
+
 
 Relax.prototype.end = function(cb){
     var path = url.parse('http://localhost:5984/greek');

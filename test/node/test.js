@@ -17,12 +17,42 @@ describe('relax - server level', function(){
     describe('methods', function(){
         it('should list all dbs', function(done){
             relax.allDbs(function(res){
-                log('RES', res.text)
+                log('RES', res)
                 done();
             })
-        })
-    })
-})
+        });
+        it('should get server config', function(done){
+            relax.config(function(res){
+                log('CFG', res)
+                done();
+            });
+        });
+        it('should get server info', function(done){
+            relax.info(function(res){
+                log('INFO', res)
+                done();
+            });
+        });
+        it('should get server stats', function(done){
+            relax.stats(function(res){
+                //log('STATS', res)
+                done();
+            });
+        });
+        it('should get active tasks', function(done){
+            relax.activeTasks(function(res){
+                log('AT', res)
+                done();
+            });
+        });
+        it('should get uuids(count)', function(done){
+            relax.uuids(2, function(res){
+                log('COUNT', res)
+                done();
+            });
+        });
+    });
+});
 
 
 describe('relax', function(){
