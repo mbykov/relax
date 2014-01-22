@@ -37,6 +37,16 @@ describe('relax', function(){
         })
     })
 
+    describe('class methods', function(){
+        it('should get _all_dbs', function(done){
+            relax
+                .allDbs()
+                .end(function(res){
+                    log('RES', res.text)
+                    done();
+                })
+        })
+    })
 })
 
 
