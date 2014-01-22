@@ -5,6 +5,7 @@ var url = require('url');
 //var _ = require('underscore');
 //var request = require('superagent');
 // var noop = function() {};
+var request = require('superagent');
 
 module.exports = Relax;
 
@@ -12,24 +13,30 @@ module.exports = Relax;
  * Initialize `Relax`
  */
 
+
+/* здесь дефолты. Dbname, etc - сеттеры. Должна быть и .request - строка
+   .end - главная, в ней валидация на осмысленность
+   не-чайнабл - .allDbs, etc. См. cradle
+*/
+
 function Relax() {
     if (!(this instanceof Relax)) return new Relax();
     // this.opts = opts({port:5984, host: '127.0.0.1', protocol: 'http:'});
     // log('O', this.opts())
     this.host = 'localhost';
     this.port = 5984;
-    // request.dbname = this.dbname;
-    // request.ddoc = this.ddoc;
-    // //request.dbname = this.dbname.bind(this);
-    // //request.dbname = request.get;
-    // log('==O==', Object.keys(request))
-    // // request.allDbs = allDbs;
-
-    // // [dbname, allDbs, activeTasks, info].forEach(function(method) {
-    // //     request[method.name] = method;
-    // // })
     return this;
 }
+
+Relax.prototype.allDbs = function(cb){
+    var path = url.parse('http://localhost:5984/_all_dbs');
+    request.get(path, cb);
+};
+
+Relax.prototype.end = function(cb){
+    var path = url.parse('http://localhost:5984/greek');
+    request.get(path, cb);
+};
 
 Relax.prototype.dbname = function(name){
     name = (name[0] === '/') ? name : ('/' + name);
@@ -41,12 +48,6 @@ Relax.prototype.dbname = function(name){
 Relax.prototype.ddoc = function(name){
     this.view = name;
     return this;
-};
-
-Relax.prototype.end = function(cb){
-    var request = require('superagent');
-    var path = url.parse('http://localhost:5984/greek');
-    request.get(path, cb);
 };
 
 

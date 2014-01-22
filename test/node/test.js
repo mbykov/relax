@@ -12,6 +12,19 @@ var relax = require('../../')();
 // });
 // app.listen(5985);
 
+
+describe('relax - server level', function(){
+    describe('methods', function(){
+        it('should list all dbs', function(done){
+            relax.allDbs(function(res){
+                log('RES', res.text)
+                done();
+            })
+        })
+    })
+})
+
+
 describe('relax', function(){
     describe('with an object', function(){
         it('should set dbname', function(done){
