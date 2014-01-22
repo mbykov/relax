@@ -17,13 +17,12 @@ function Relax() {
     if (!(this instanceof Relax)) return new Relax();
     // this.opts = opts({port:5984, host: '127.0.0.1', protocol: 'http:'});
     // log('O', this.opts())
-    // TODO: что же, вот так тупо перечислять методы?
-    // var parse = request.parse[this.type];
-    // return parse
-    //     ? parse(str)
-    //     : null;
-    request.dbname = dbname;
-    request.allDbs = allDbs;
+    // request.dbname = dbname;
+    // request.allDbs = allDbs;
+    // TODO: classMethods, instMethods ?
+    [dbname, allDbs].forEach(function(method) {
+        request[method.name] = method;
+    })
     return request;
 }
 
