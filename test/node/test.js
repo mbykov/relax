@@ -60,7 +60,7 @@ describe('relax', function(){
         it('should set dbname', function(done){
             var db = relax
                 .dbname('latin')
-                .ddoc('latin')
+                .query({ format: 'json' });
             db.end(function(res){
                 log('RES', res.text)
                 done();
