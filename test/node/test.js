@@ -13,6 +13,25 @@ var relax = require('../../')();
 // app.listen(5985);
 
 
+describe('relax - db level', function(){
+    describe('crud methods', function(){
+        it('should check if db exists', function(done){
+            relax.exists('latin', function(res){
+                res.should.be.true;
+                done();
+            })
+        })
+        it('should check if db not exists', function(done){
+            relax.exists('not-existing-db', function(res){
+                res.should.not.be.true;
+                done();
+            })
+        })
+    })
+})
+
+return;
+
 describe('relax - server level', function(){
     describe('methods', function(){
         it('should list all dbs', function(done){

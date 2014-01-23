@@ -1,7 +1,6 @@
 // var type = require('type');
 // var query = require('querystring');
 var url = require('url');
-//var merge = require('merge');
 //var opts = require('opts');
 // var noop = function() {};
 var request = require('superagent');
@@ -16,7 +15,9 @@ module.exports = Relax;
 /*
    TODO: Relax.obj:
    сеттеры:   .dbname, .host, .port, .schema
-   db: .create, .drop, .info, .compact, .viewCleanUp, .replicate
+   server: .allDbs, .info, .compact, .viewCleanUp, .replicate, .uuids, .config
+   auth:
+   db: .exists, .create, .drop, .info, .compact, .viewCleanUp, .replicate
 
    TODO: SA.obj:
    doc: .get, .push, .copy, .delete
@@ -24,7 +25,6 @@ module.exports = Relax;
 
    docs: .allDocs, .bulkSave, .bulkRemove
    ddocs: .allDesignDocs
-   sess:
 
    0. опять, в каком случае можно вызвать методы SA?
      то есть dbname возвращает уже SA.get объект. Все возвращает SA.obj, кроме специализированных методов.
@@ -35,10 +35,36 @@ module.exports = Relax;
 
 function Relax() {
     if (!(this instanceof Relax)) return new Relax();
-    this.opts = opts({host: 'localhost:5984', protocol: 'http:'})();
-    // log('O', this.opts)
+    var defaults = url.parse('http://localhost:5984');
+    this.opts = merge({}, defaults);
+    //log('O', this.opts)
     return this;
 }
+
+// Database.prototype.exists = function (callback) {
+//     this.query({ method: 'HEAD' }, function (err, res, status) {
+//         if (err) {
+//             callback(err);
+//         } else {
+//             if (status < 200 || status > 300) {
+//                 callback(null, false);
+//             } else {
+//                 callback(null, true);
+//             }
+//         }
+//     });
+// };
+
+Relax.prototype.exists = function(name, cb){
+    var path = this.opts.href + name;
+    request.head(path, function(res){cb(res.ok)});
+};
+
+Relax.prototype.create = function(name){
+    if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
+
+    request.get(path, function(res){cb(res.text)});
+};
 
 Relax.prototype.allDbs = function(cb){
     var path = url.parse('http://localhost:5984/_all_dbs');
@@ -74,15 +100,11 @@ Relax.prototype.uuids = function(count, cb){
 };
 
 Relax.prototype.dbname = function(uri){
-    //name = (name[0] === '/') ? name : ('/' + name);
-    var opts = url.parse('http://localhost:5984/' + uri + '?m=b');
-    //var opts = url.parse(uri);
-    //log('', 'A', this.opts)
-    //log('B', opts)
+    var opts = url.parse(uri);
     this.opts = merge(this.opts, opts);
-    //log('C', this.opts)
     return request.get(this.opts.href);
 };
+
 
 function merge(a, b) {
     var keys = Object.keys(b);
@@ -94,19 +116,21 @@ function merge(a, b) {
     return a;
 };
 
-function opts(obj) {
-    return (function (key, val) {
-        switch (arguments.length) {
-        case 0: return obj;
-        case 1: return obj[key];
-        case 2: obj[key] = val;
-        }
-    });
-}
 
 function log () { console.log.apply(console, arguments) }
 
 /*
+
+  function opts(obj) {
+  return (function (key, val) {
+  switch (arguments.length) {
+  case 0: return obj;
+  case 1: return obj[key];
+  case 2: obj[key] = val;
+  }
+  });
+  }
+
 //inherit(relax, request);
 function inherit(a, b){
     var fn = function(){};
