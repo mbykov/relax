@@ -1,5 +1,5 @@
 var url = require('url');
-var map = require('map-component');
+var map = require('map-component'); // FIXME: try etc
 var request = require('superagent');
 
 module.exports = Relax;
@@ -63,13 +63,38 @@ Relax.prototype.drop = function(name, cb) {
 
 Relax.prototype.get = function(doc, cb) {
     var path = this.opts.href + '/' + doc._id;
-    log('HREF', this.opts.href);
     request
         .get(path)
         .query({include_docs: true})
         .end( function(res){
             //log('DOC', res);
             (res.ok) ? cb(null, JSON.parse(res.text)) : cb(res.text.trim(), null);
+        });
+};
+
+Relax.prototype.push = function(doc, cb) {
+    var db_path = this.opts.href;
+    var doc_path = db_path + '/' + doc._id;
+    request
+        .get(doc_path)
+        .query({include_docs: true})
+        .end( function(res) {
+            if (res.ok) {
+                var dbdoc = JSON.parse(res.text);
+                doc._rev = dbdoc._rev;
+                log('REV', doc);
+                request
+                    .post(db_path)
+                    .send(doc)
+                    .end(function(res) {
+                        (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+                    }) ;
+            } else {
+                var path = this.opts.href;
+                // request.post(path, function(res) {
+                //     (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+                // }) ;
+            }
         });
 };
 
@@ -88,15 +113,6 @@ function docs(res) {
     return map(JSON.parse(res.text).rows, function(row) {return row.doc});
 }
 
-Relax.prototype.push = function(doc, cb) {
-    var path = this.opts.href + '/' + doc._id;
-    request.get(path, function(res){
-        if (res.ok) { //cb(null, res.ok) : cb(res.text.trim(), null);
-            request.put()
-        }
-        s
-    });
-};
 
 /*
  * Server-level methods

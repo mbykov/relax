@@ -69,7 +69,7 @@ var db;
 // })
 
 describe('relax - docs level', function(){
-    var doc = {_id: 'some-id', text: 'some text'};
+    var doc = {_id: 'some-id', body: 'some text'};
     // before(function(done){
     //     db = relax.dbname('http://admin:kjre4317@localhost:5984');
     //     db.create('relax-specs', function(err, res){
@@ -95,11 +95,19 @@ describe('relax - docs level', function(){
         // })
         it('should get doc by id', function(done){
             relax.dbname('http://localhost:5984/relax-specs')
-                .getall(doc, function(err, res){
-                    log('DOC', res)
-                    //err.should.equal('{"error":"not_found","reason":"missing"}');
+                .get(doc, function(err, res){
+                    res.body.should.equal('some text');
+                    //log('DOC', res)
                 done();
             })
+        })
+        it('should push doc if it exists in DB', function(done){
+            doc.more = true;
+            relax.dbname('http://localhost:5984/relax-specs')
+                .push(doc, function(err, res){
+                    res.should.be.true;
+                    done();
+                })
         })
         // it('should push doc w/o id', function(done){
         //     relax.push(doc, function(err, res){
