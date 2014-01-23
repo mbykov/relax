@@ -1,8 +1,4 @@
-// var type = require('type');
-// var query = require('querystring');
 var url = require('url');
-//var opts = require('opts');
-// var noop = function() {};
 var request = require('superagent');
 
 module.exports = Relax;
@@ -10,28 +6,6 @@ module.exports = Relax;
 /**
  * Initialize `Relax`
  */
-
-
-/*
-   TODO: Relax.obj:
-   сеттеры:   .dbname, .host, .port, .schema
-   server: .allDbs, .info, .compact, .viewCleanUp, .replicate, .uuids, .config
-   auth:
-   db: .exists, .create, .drop, .info, .compact, .viewCleanUp, .replicate
-
-   TODO: SA.obj:
-   doc: .get, .push, .copy, .delete
-   docs: .view, .show, .list, .update
-
-   docs: .allDocs, .bulkSave, .bulkRemove
-   ddocs: .allDesignDocs
-
-   0. опять, в каком случае можно вызвать методы SA?
-     то есть dbname возвращает уже SA.get объект. Все возвращает SA.obj, кроме специализированных методов.
-   1. разобрать URL.
-   2. cradle-responce.js много полезного
-   3.
-*/
 
 function Relax(uri) {
     if (!(this instanceof Relax)) return new Relax(uri);
@@ -42,24 +16,44 @@ function Relax(uri) {
     return this;
 }
 
+//return request.get(this.opts.href);
+/*
+ * Setters
+*/
+
+Relax.prototype.dbname = function(uri) {
+    var opts = url.parse(uri);
+    this.opts = merge(this.opts, opts);
+    return this;
+};
+
+/*
+ * DB-level methods
+*/
+
 Relax.prototype.exists = function(name, cb) {
     var path = this.opts.href + name;
     request.head(path, function(res){cb(res.ok)});
 };
 
 Relax.prototype.create = function(name, cb) {
-    //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
     var path = this.opts.href + name;
     request.put(path, function(res){
-        (res.ok) ? cb(null, res) : cb(res.text.trim(), null);
+        (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
 };
 
-Relax.prototype.dbname = function(uri) {
-    var opts = url.parse(uri);
-    this.opts = merge(this.opts, opts);
-    return request.get(this.opts.href);
+Relax.prototype.drop = function(name, cb) {
+    var path = this.opts.href + name;
+    request.del(path, function(res){
+        (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+    });
 };
+
+/*
+ * Server-level methods
+ //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
+ */
 
 Relax.prototype.allDbs = function(cb) {
     var path = url.parse('http://localhost:5984/_all_dbs');
@@ -94,18 +88,17 @@ Relax.prototype.uuids = function(count, cb) {
     request.get(path, function(res){cb(res.text)});
 };
 
-
 function merge(a, b) {
     var keys = Object.keys(b);
     keys.forEach(function(key) {
         a[key] = b[key] || a[key];
     })
+    a.auth = b.auth;
     a.dbname = a.pathname.replace(/^\//,'');
     var auth = (a.auth) ? a.auth+'@' : '';
     a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname;
     return a;
 };
-
 
 function log () { console.log.apply(console, arguments) }
 

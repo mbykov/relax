@@ -28,15 +28,36 @@ describe('relax - db level', function(){
             })
         })
         it('should not create db w/o auth', function(done){
-            relax.create('spec-db', function(err, res){
+            relax.create('relax-specs', function(err, res){
                 err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
                 done();
             })
         })
+        it('should create already existing db with auth', function(done){
+            var db = relax.dbname('http://admin:kjre4317@localhost:5984');
+            db.create('relax-specs', function(err, res){
+                res.should.be.true;
+                done();
+            })
+        })
         it('should not create already existing db with auth', function(done){
-            var db = require('../../')('http://admin:kjre4317@localhost:5984'); // FIXME: проблема. нельзя .dbname.create
-            db.create('spec-db', function(err, res){
+            var db = relax.dbname('http://admin:kjre4317@localhost:5984');
+            db.create('relax-specs', function(err, res){
                 err.should.equal('{"error":"file_exists","reason":"The database could not be created, the file already exists."}');
+                done();
+            })
+        })
+        it('should not drop already existing db w/o auth', function(done){
+            var db = relax.dbname('http://localhost:5984');
+            db.drop('relax-specs', function(err, res){
+                err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
+                done();
+            })
+        })
+        it('should drop already existing db with auth', function(done){
+            var db = relax.dbname('http://admin:kjre4317@localhost:5984');
+            db.drop('relax-specs', function(err, res){
+                res.should.be.true;
                 done();
             })
         })
