@@ -82,12 +82,12 @@ Relax.prototype.push = function(doc, cb) {
             if (res.ok) {
                 var dbdoc = JSON.parse(res.text);
                 doc._rev = dbdoc._rev;
-                log('REV', doc);
+                //log('REV', doc);
                 request
                     .post(db_path)
                     .send(doc)
                     .end(function(res) {
-                        (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+                        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(res.text.trim(), null);
                     }) ;
             } else {
                 var path = this.opts.href;

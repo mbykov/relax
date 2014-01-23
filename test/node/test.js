@@ -69,7 +69,7 @@ var db;
 // })
 
 describe('relax - docs level', function(){
-    var doc = {_id: 'some-id', body: 'some text'};
+    var doc = {_id: 'some-id', body: 'some text', count: 0};
     // before(function(done){
     //     db = relax.dbname('http://admin:kjre4317@localhost:5984');
     //     db.create('relax-specs', function(err, res){
@@ -102,10 +102,12 @@ describe('relax - docs level', function(){
             })
         })
         it('should push doc if it exists in DB', function(done){
-            doc.more = true;
             relax.dbname('http://localhost:5984/relax-specs')
                 .push(doc, function(err, res){
-                    res.should.be.true;
+                    //should.exist(err);
+                    //should(err).equal(null);
+                    //log('===', res)
+                    res.ok.should.be.ok;
                     done();
                 })
         })
