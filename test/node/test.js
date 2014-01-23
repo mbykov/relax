@@ -5,6 +5,7 @@
 //var app = express();
 var url = require('url');
 var relax = require('../../')();
+var db;
 //var relax = new Relax();
 
 // app.get('/login', function(req, res){
@@ -14,26 +15,29 @@ var relax = require('../../')();
 
 
 describe('relax - db level', function(){
+    beforeEach(function(){
+        db = relax.dbname('http://localhost:5984');
+    })
     describe('crud methods', function(){
         it('should check if db exists', function(done){
-            relax.exists('latin', function(res){
+            db.exists('latin', function(res){
                 res.should.be.true;
                 done();
             })
         })
         it('should check if db not exists', function(done){
-            relax.exists('not-existing-db', function(res){
+            db.exists('not-existing-db', function(res){
                 res.should.not.be.true;
                 done();
             })
         })
         it('should not create db w/o auth', function(done){
-            relax.create('relax-specs', function(err, res){
+            db.create('relax-specs', function(err, res){
                 err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
                 done();
             })
         })
-        it('should create already existing db with auth', function(done){
+        it('should create non-existing db with auth', function(done){
             var db = relax.dbname('http://admin:kjre4317@localhost:5984');
             db.create('relax-specs', function(err, res){
                 res.should.be.true;
@@ -48,7 +52,7 @@ describe('relax - db level', function(){
             })
         })
         it('should not drop already existing db w/o auth', function(done){
-            var db = relax.dbname('http://localhost:5984');
+            //var db = relax.dbname('http://localhost:5984');
             db.drop('relax-specs', function(err, res){
                 err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
                 done();
@@ -63,6 +67,30 @@ describe('relax - db level', function(){
         })
     })
 })
+
+// describe('relax - docs level', function(){
+//     var db = relax.dbname('http://admin:kjre4317@localhost:5984');
+//     beforeEach(function(done){
+//         db.create('relax-specs', function(err, res){
+//             log('B', err, res)
+//             done();
+//         })
+//     })
+//     afterEach(function(done){
+//         db.drop('relax-specs', function(err, res){
+//             log('A', err, res)
+//             done();
+//         })
+//     })
+//     describe('doc-crud methods', function(){
+//         it('should get doc by _id', function(done){
+//             relax.get('xxx', function(res){
+//                 log('GET', res)
+//                 done();
+//             })
+//         })
+//     })
+// })
 
 return;
 
@@ -121,7 +149,6 @@ describe('relax', function(){
         })
     })
 
-    return;
 
     describe('with an object', function(){
         it('should format the url', function(done){
@@ -166,6 +193,7 @@ describe('relax', function(){
                 })
         })
     })
+
     describe('class methods', function(){
         it('should get DB info', function(done){
             //relax

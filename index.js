@@ -37,6 +37,7 @@ Relax.prototype.exists = function(name, cb) {
 };
 
 Relax.prototype.create = function(name, cb) {
+    log('AUTH-create', this.opts.auth)
     var path = this.opts.href + name;
     request.put(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
@@ -44,6 +45,7 @@ Relax.prototype.create = function(name, cb) {
 };
 
 Relax.prototype.drop = function(name, cb) {
+    log('AUTH-drop', this.opts.auth)
     var path = this.opts.href + name;
     request.del(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
