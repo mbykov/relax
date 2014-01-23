@@ -97,16 +97,13 @@ describe('relax - docs level', function(){
             relax.dbname('http://localhost:5984/relax-specs')
                 .get(doc, function(err, res){
                     res.body.should.equal('some text');
-                    //log('DOC', res)
                 done();
             })
         })
         it('should push doc if it exists in DB', function(done){
             relax.dbname('http://localhost:5984/relax-specs')
                 .push(doc, function(err, res){
-                    //should.exist(err);
-                    //should(err).equal(null);
-                    //log('===', res)
+                    (err == null).should.be.true;
                     res.ok.should.be.ok;
                     done();
                 })
