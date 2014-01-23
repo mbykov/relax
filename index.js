@@ -1,4 +1,5 @@
 var url = require('url');
+var map = require('map-component');
 var request = require('superagent');
 
 module.exports = Relax;
@@ -71,6 +72,21 @@ Relax.prototype.get = function(doc, cb) {
             (res.ok) ? cb(null, JSON.parse(res.text)) : cb(res.text.trim(), null);
         });
 };
+
+Relax.prototype.getall = function(doc, cb) {
+    var path = this.opts.href + '/_all_docs';
+    request
+        .get(path)
+        .query({include_docs: true})
+        .end( function(res){
+            //log('DOC', res);
+            (res.ok) ? cb(null, docs(res)) : cb(res.text.trim(), null);
+        });
+};
+
+function docs(res) {
+    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
+}
 
 Relax.prototype.push = function(doc, cb) {
     var path = this.opts.href + '/' + doc._id;

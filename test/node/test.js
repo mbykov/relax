@@ -95,9 +95,9 @@ describe('relax - docs level', function(){
         // })
         it('should get doc by id', function(done){
             relax.dbname('http://localhost:5984/relax-specs')
-                .get(doc, function(err, res){
+                .getall(doc, function(err, res){
                     log('DOC', res)
-                //err.should.equal('{"error":"not_found","reason":"missing"}');
+                    //err.should.equal('{"error":"not_found","reason":"missing"}');
                 done();
             })
         })

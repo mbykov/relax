@@ -6,8 +6,7 @@
   "keywords": [],
     "dependencies": {
         "visionmedia/superagent": "*",
-        "yields/opts": "*",
-        "yields/merge": "*",
+        "component/map": "*",
         "component/url": "*"
     },
   "license": "MIT",

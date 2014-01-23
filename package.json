@@ -4,11 +4,11 @@
   "version": "0.0.1",
   "dependencies": {
       "url": "*",
+      "map-component": "*",
       "superagent": "*"
   },
   "devDependencies": {
       "express": "*",
-      "better-assert": "*",
       "mocha": "*",
       "should": "*"
   },
