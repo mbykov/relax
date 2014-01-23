@@ -37,7 +37,6 @@ Relax.prototype.exists = function(name, cb) {
 };
 
 Relax.prototype.create = function(name, cb) {
-    log('AUTH-create', this.opts.auth)
     var path = this.opts.href + name;
     request.put(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
@@ -45,7 +44,6 @@ Relax.prototype.create = function(name, cb) {
 };
 
 Relax.prototype.drop = function(name, cb) {
-    log('AUTH-drop', this.opts.auth)
     var path = this.opts.href + name;
     request.del(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
@@ -53,9 +51,43 @@ Relax.prototype.drop = function(name, cb) {
 };
 
 /*
+ * DB-level methods
+
+ request.get(this.opts.href)
+ .query(id)
+ .end(function(res){
+ (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+ });
+ */
+
+Relax.prototype.get = function(doc, cb) {
+    var path = this.opts.href + '/' + doc._id;
+    log('HREF', this.opts.href);
+    request
+        .get(path)
+        .query({include_docs: true})
+        .end( function(res){
+            //log('DOC', res);
+            (res.ok) ? cb(null, JSON.parse(res.text)) : cb(res.text.trim(), null);
+        });
+};
+
+Relax.prototype.push = function(doc, cb) {
+    var path = this.opts.href + '/' + doc._id;
+    request.get(path, function(res){
+        if (res.ok) { //cb(null, res.ok) : cb(res.text.trim(), null);
+            request.put()
+        }
+        s
+    });
+};
+
+/*
  * Server-level methods
  //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
  */
+
+
 
 Relax.prototype.allDbs = function(cb) {
     var path = url.parse('http://localhost:5984/_all_dbs');
