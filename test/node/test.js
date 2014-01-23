@@ -27,6 +27,19 @@ describe('relax - db level', function(){
                 done();
             })
         })
+        it('should not create db w/o auth', function(done){
+            relax.create('spec-db', function(err, res){
+                err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
+                done();
+            })
+        })
+        it('should not create already existing db with auth', function(done){
+            var db = require('../../')('http://admin:kjre4317@localhost:5984'); // FIXME: проблема. нельзя .dbname.create
+            db.create('spec-db', function(err, res){
+                err.should.equal('{"error":"file_exists","reason":"The database could not be created, the file already exists."}');
+                done();
+            })
+        })
     })
 })
 

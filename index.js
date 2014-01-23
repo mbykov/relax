@@ -33,76 +33,65 @@ module.exports = Relax;
    3.
 */
 
-function Relax() {
-    if (!(this instanceof Relax)) return new Relax();
+function Relax(uri) {
+    if (!(this instanceof Relax)) return new Relax(uri);
     var defaults = url.parse('http://localhost:5984');
-    this.opts = merge({}, defaults);
-    //log('O', this.opts)
+    uri = uri || '';
+    var opts = url.parse(uri)
+    this.opts = merge(defaults, opts);
     return this;
 }
 
-// Database.prototype.exists = function (callback) {
-//     this.query({ method: 'HEAD' }, function (err, res, status) {
-//         if (err) {
-//             callback(err);
-//         } else {
-//             if (status < 200 || status > 300) {
-//                 callback(null, false);
-//             } else {
-//                 callback(null, true);
-//             }
-//         }
-//     });
-// };
-
-Relax.prototype.exists = function(name, cb){
+Relax.prototype.exists = function(name, cb) {
     var path = this.opts.href + name;
     request.head(path, function(res){cb(res.ok)});
 };
 
-Relax.prototype.create = function(name){
-    if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
-
-    request.get(path, function(res){cb(res.text)});
+Relax.prototype.create = function(name, cb) {
+    //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
+    var path = this.opts.href + name;
+    request.put(path, function(res){
+        (res.ok) ? cb(null, res) : cb(res.text.trim(), null);
+    });
 };
 
-Relax.prototype.allDbs = function(cb){
+Relax.prototype.dbname = function(uri) {
+    var opts = url.parse(uri);
+    this.opts = merge(this.opts, opts);
+    return request.get(this.opts.href);
+};
+
+Relax.prototype.allDbs = function(cb) {
     var path = url.parse('http://localhost:5984/_all_dbs');
     //request.get(path, cb);
     request.get(path, function(res){cb(res.text)});
 };
 
-Relax.prototype.config = function(cb){
+Relax.prototype.config = function(cb) {
     var path = url.parse('http://localhost:5984/_config');
     request.get(path, function(res){cb(res.text)});
 };
 
-Relax.prototype.info = function(cb){
+Relax.prototype.info = function(cb) {
     var path = url.parse('http://localhost:5984/');
     request.get(path, function(res){cb(res.text)});
 };
 
-Relax.prototype.stats = function(cb){
+Relax.prototype.stats = function(cb) {
     var path = url.parse('http://localhost:5984/_stats');
     request.get(path, function(res){cb(res.text)});
 };
 
-Relax.prototype.activeTasks = function(cb){
+Relax.prototype.activeTasks = function(cb) {
     var path = url.parse('http://localhost:5984/_active_tasks');
     request.get(path, function(res){cb(res.text)});
 };
 
-Relax.prototype.uuids = function(count, cb){
+Relax.prototype.uuids = function(count, cb) {
     if (typeof count === 'function') callback = count, count = null;
     // FIXME: query - см cradle
     var path = url.parse('http://localhost:5984/_uuids');
     request.get(path, function(res){cb(res.text)});
-};
-
-Relax.prototype.dbname = function(uri){
-    var opts = url.parse(uri);
-    this.opts = merge(this.opts, opts);
-    return request.get(this.opts.href);
 };
 
 
@@ -112,7 +101,8 @@ function merge(a, b) {
         a[key] = b[key] || a[key];
     })
     a.dbname = a.pathname.replace(/^\//,'');
-    a.href = a.protocol+'//'+a.host+'/'+a.dbname;
+    var auth = (a.auth) ? a.auth+'@' : '';
+    a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname;
     return a;
 };
 
