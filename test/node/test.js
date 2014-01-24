@@ -93,14 +93,15 @@ describe('relax - docs level', function(){
         //         done();
         //     })
         // })
-        it('should get doc by id', function(done){
+        it('should get doc by id if it exists', function(done){
             relax.dbname('http://localhost:5984/relax-specs')
                 .get(doc, function(err, res){
-                    res.body.should.equal('some text');
+                    (err == null).should.be.true;
+                    (res.error) ? res.error.should.equal('not_found') : res.body.should.equal('some text');
                 done();
             })
         })
-        it('should push doc if it exists in DB', function(done){
+        it('should push doc if it exists in DB or does not', function(done){
             relax.dbname('http://localhost:5984/relax-specs')
                 .push(doc, function(err, res){
                     (err == null).should.be.true;
@@ -108,12 +109,22 @@ describe('relax - docs level', function(){
                     done();
                 })
         })
-        // it('should push doc w/o id', function(done){
-        //     relax.push(doc, function(err, res){
-        //         err.should.equal('{"error":"not_found","reason":"missing"}');
-        //         done();
-        //     })
-        // })
+        it('should delete doc', function(done){
+            relax.dbname('http://localhost:5984/relax-specs')
+                .del(doc, function(err, res){
+                    (err == null).should.be.true;
+                    (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
+                    done();
+                })
+        })
+        it('should not get doc by id if it does not exist', function(done){
+            relax.dbname('http://localhost:5984/relax-specs')
+                .get(doc, function(err, res){
+                    (err == null).should.be.true;
+                    (res.error) ? res.error.should.equal('not_found') : res.body.should.equal('some text');
+                    done();
+                })
+        })
     })
 })
 

@@ -11,6 +11,7 @@ module.exports = Relax;
 function Relax(uri) {
     if (!(this instanceof Relax)) return new Relax(uri);
     var defaults = url.parse('http://localhost:5984');
+    //log(defaults)
     uri = uri || '';
     var opts = url.parse(uri)
     this.opts = merge(defaults, opts);
@@ -61,7 +62,7 @@ Relax.prototype.drop = function(name, cb) {
  });
  */
 
-Relax.prototype.get = function(doc, cb) {
+Relax.prototype.get_ = function(doc, cb) {
     var path = this.opts.href + '/' + doc._id;
     request
         .get(path)
@@ -72,30 +73,56 @@ Relax.prototype.get = function(doc, cb) {
         });
 };
 
-Relax.prototype.push = function(doc, cb) {
-    var db_path = this.opts.href;
-    var doc_path = db_path + '/' + doc._id;
+function getDoc(path, cb) {
     request
-        .get(doc_path)
+        .get(path)
         .query({include_docs: true})
-        .end( function(res) {
-            if (res.ok) {
-                var dbdoc = JSON.parse(res.text);
-                doc._rev = dbdoc._rev;
-                //log('REV', doc);
-                request
-                    .post(db_path)
-                    .send(doc)
-                    .end(function(res) {
-                        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(res.text.trim(), null);
-                    }) ;
-            } else {
-                var path = this.opts.href;
-                // request.post(path, function(res) {
-                //     (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
-                // }) ;
-            }
+        .end(function(res) { cb(res) });
+}
+
+function postDoc(host, doc, cb) {
+    request
+        .post(host)
+        .send(doc)
+        .end(function(res) { cb(res) });
+}
+
+Relax.prototype.get = function(doc, cb) {
+    var path = this.opts.href + '/' + doc._id;
+    getDoc(path, function(res){
+        var json = JSON.parse(res.text.trim());
+        //(res.ok) ? cb(null, JSON.parse(res.text)) : cb(null, res.text.trim());
+        cb(null, json);
+    });
+}
+
+Relax.prototype.push = function(doc, cb) {
+    var host = this.opts.href;
+    getDoc(host + '/' + doc._id, function(res) {
+        if (res.ok) {
+            var dbdoc = JSON.parse(res.text);
+            doc._rev = dbdoc._rev;
+        }
+        postDoc(host, doc, function(res) {
+            (res.ok) ? cb(null, JSON.parse(res.text)) : cb(res.text.trim(), null);
         });
+    })
+};
+
+Relax.prototype.del = function(doc, cb) {
+    var host = this.opts.href;
+    getDoc(host + '/' + doc._id, function(res) {
+        if (res.ok) {
+            var dbdoc = JSON.parse(res.text);
+            doc._rev = dbdoc._rev;
+            doc._deleted = true;
+            postDoc(host, doc, function(res) {
+                (res.ok) ? cb(null, JSON.parse(res.text)) : cb(res.text.trim(), null);
+            });
+        } else {
+            cb(null, JSON.parse(res.text))
+        }
+    });
 };
 
 Relax.prototype.getall = function(doc, cb) {
@@ -169,6 +196,34 @@ function merge(a, b) {
 function log () { console.log.apply(console, arguments) }
 
 /*
+
+  Relax.prototype.push_ = function(doc, cb) {
+  var db_path = this.opts.href;
+  var doc_path = db_path + '/' + doc._id;
+  request
+  .get(doc_path)
+  .query({include_docs: true})
+  .end( function(res) {
+  if (res.ok) {
+  var dbdoc = JSON.parse(res.text);
+  doc._rev = dbdoc._rev;
+  //log('REV', doc);
+  request
+  .post(db_path)
+  .send(doc)
+  .end(function(res) {
+  (res.ok) ? cb(null, JSON.parse(res.text)) : cb(res.text.trim(), null);
+  }) ;
+  } else {
+  var path = this.opts.href;
+  // request.post(path, function(res) {
+  //     (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+  // }) ;
+  }
+  });
+  };
+
+
 
   function opts(obj) {
   return (function (key, val) {
