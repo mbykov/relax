@@ -13,115 +13,105 @@ var db;
 // });
 // app.listen(5985);
 
+describe('view, show, list', function(){
+    var doc = {_id: 'some-id', body: 'some text', count: 0};
+    describe('view', function(){
+        it('should get docs from view', function(done){
+            relax.dbname('http://localhost:5984/latin');
+            relax
+                .view('latin/by_dict')
+                .end(function(res){
+                    relax.fdocs(res).length.should.equal(5);
+                    //log(relax.fdocs(res));
+                    done();
+                });
+        })
+        it('should get docs from view', function(done){
+            relax.dbname('http://localhost:5984/latin');
+            relax
+                .view('latin/by_dict')
+                .query({key:'"aperio"'})
+                .end(function(res){
+                    relax.fdocs(res)[0].dict.should.equal('aperio')
+                    done();
+                });
+        })
+        //
+        // it('should not get doc if it does not exist', function(done){
+        //     relax
+        //         .get(doc)
+        //         .set('cache', true)
+        //         .end(function(res){
+        //             res.text.trim().should.equal('{"error":"not_found","reason":"missing"}')
+        //             done();
+        //         });
+        // })
+    })
+})
 
-// describe('relax - db level', function(){
-//     beforeEach(function(){
-//         db = relax.dbname('http://localhost:5984');
-//     })
-//     describe('crud methods', function(){
-//         it('should check if db exists', function(done){
-//             db.exists('latin', function(res){
-//                 res.should.be.true;
-//                 done();
-//             })
-//         })
-//         it('should check if db not exists', function(done){
-//             db.exists('not-existing-db', function(res){
-//                 res.should.not.be.true;
-//                 done();
-//             })
-//         })
-//         it('should not create db w/o auth', function(done){
-//             db.create('relax-specs', function(err, res){
-//                 err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
-//                 done();
-//             })
-//         })
-//         it('should create non-existing db with auth', function(done){
-//             var db = relax.dbname('http://admin:kjre4317@localhost:5984');
-//             db.create('relax-specs', function(err, res){
-//                 res.should.be.true;
-//                 done();
-//             })
-//         })
-//         it('should not create already existing db with auth', function(done){
-//             var db = relax.dbname('http://admin:kjre4317@localhost:5984');
-//             db.create('relax-specs', function(err, res){
-//                 err.should.equal('{"error":"file_exists","reason":"The database could not be created, the file already exists."}');
-//                 done();
-//             })
-//         })
-//         it('should not drop already existing db w/o auth', function(done){
-//             //var db = relax.dbname('http://localhost:5984');
-//             db.drop('relax-specs', function(err, res){
-//                 err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
-//                 done();
-//             })
-//         })
-//         it('should drop already existing db with auth', function(done){
-//             var db = relax.dbname('http://admin:kjre4317@localhost:5984');
-//             db.drop('relax-specs', function(err, res){
-//                 res.should.be.true;
-//                 done();
-//             })
-//         })
-//     })
-// })
+return
 
 describe('relax - docs level', function(){
     var doc = {_id: 'some-id', body: 'some text', count: 0};
-    // before(function(done){
-    //     db = relax.dbname('http://admin:kjre4317@localhost:5984');
-    //     db.create('relax-specs', function(err, res){
-    //         //log('B', err, res)
-    //         relax.dbname('http://localhost:5984/relax-specs');
-    //         done();
-    //     })
-    // })
-    // after(function(done){
-    //     db = relax.dbname('http://admin:kjre4317@localhost:5984');
-    //     db.drop('relax-specs', function(err, res){
-    //         relax.dbname('http://localhost:5984/relax-specs');
-    //         //log('A', err, res)
-    //         done();
-    //     })
-    // })
+    before(function(done){
+        db = relax.dbname('http://admin:kjre4317@localhost:5984');
+        db.create('relax-specs', function(err, res){
+            relax.dbname('http://localhost:5984/relax-specs');
+            done();
+        })
+    })
+    after(function(done){
+        db = relax.dbname('http://admin:kjre4317@localhost:5984');
+        db.drop('relax-specs', function(err, res){
+            relax.dbname('http://localhost:5984/relax-specs');
+            done();
+        })
+    })
+
     describe('doc-crud methods', function(){
-        // it('should not get doc by id if it does not exist', function(done){
-        //     relax.get(doc, function(err, res){
-        //         err.should.equal('{"error":"not_found","reason":"missing"}');
-        //         done();
-        //     })
-        // })
-        it('should get doc by id if it exists', function(done){
-            relax.dbname('http://localhost:5984/relax-specs')
-                .get(doc, function(err, res){
-                    (err == null).should.be.true;
-                    (res.error) ? res.error.should.equal('not_found') : res.body.should.equal('some text');
+        it('should not get doc if it does not exist', function(done){
+            relax.get(doc, function(err, res){
+                (err) ? err.error.should.equal('not_found') : res.body.should.equal('some text');
                 done();
             })
         })
-        it('should push doc if it exists in DB or does not', function(done){
-            relax.dbname('http://localhost:5984/relax-specs')
-                .push(doc, function(err, res){
-                    (err == null).should.be.true;
-                    res.ok.should.be.ok;
+        it('should not get doc if it does not exist', function(done){
+            relax
+                .get(doc)
+                .set('cache', true)
+                .end(function(res){
+                    res.text.trim().should.equal('{"error":"not_found","reason":"missing"}')
                     done();
-                })
+                });
         })
-        it('should delete doc', function(done){
-            relax.dbname('http://localhost:5984/relax-specs')
+        it('should not delete doc if it does not exist', function(done){
+            relax
                 .del(doc, function(err, res){
                     (err == null).should.be.true;
                     (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
                     done();
                 })
         })
-        it('should not get doc by id if it does not exist', function(done){
-            relax.dbname('http://localhost:5984/relax-specs')
-                .get(doc, function(err, res){
+        it('should push doc if it exists in DB or does not', function(done){
+            relax
+                .push(doc, function(err, res){
                     (err == null).should.be.true;
-                    (res.error) ? res.error.should.equal('not_found') : res.body.should.equal('some text');
+                    res.ok.should.be.ok;
+                    done();
+                })
+        })
+        it('should get doc if it exists', function(done){
+            relax
+                .get(doc, function(err, res){
+                    (err) ? err.error.should.equal('not_found') : res.body.should.equal('some text');
+                done();
+            })
+        })
+        it('should delete doc', function(done){
+            relax
+                .del(doc, function(err, res){
+                    (err == null).should.be.true;
+                    (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
                     done();
                 })
         })
@@ -129,6 +119,65 @@ describe('relax - docs level', function(){
 })
 
 return;
+
+describe('relax - db level', function(){
+    before(function(){
+        db = relax.dbname('http://localhost:5984');
+    })
+    describe('crud methods', function(){
+        it('should check if db exists', function(done){
+            db.exists('latin', function(res){
+                res.should.be.true;
+                done();
+            })
+        })
+        it('should check if db not exists', function(done){
+            db.exists('not-existing-db', function(res){
+                res.should.not.be.true;
+                done();
+            })
+        })
+        it('should not create db w/o auth', function(done){
+            db.create('relax-specs', function(err, res){
+                err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
+                done();
+            })
+        })
+        it('should create non-existing db with auth', function(done){
+            var db = relax.dbname('http://admin:kjre4317@localhost:5984');
+            db.create('relax-specs', function(err, res){
+                res.should.be.true;
+                done();
+            })
+        })
+        it('should not create already existing db with auth', function(done){
+            var db = relax.dbname('http://admin:kjre4317@localhost:5984');
+            db.create('relax-specs', function(err, res){
+                err.should.equal('{"error":"file_exists","reason":"The database could not be created, the file already exists."}');
+                done();
+            })
+        })
+        it('should not drop already existing db w/o auth', function(done){
+            //var db = relax.dbname('http://localhost:5984');
+            db.drop('relax-specs', function(err, res){
+                err.should.equal('{"error":"unauthorized","reason":"You are not a server admin."}');
+                done();
+            })
+        })
+        it('should drop already existing db with auth', function(done){
+            var db = relax.dbname('http://admin:kjre4317@localhost:5984');
+            db.drop('relax-specs', function(err, res){
+                res.should.be.true;
+                done();
+            })
+        })
+    })
+})
+
+return;
+
+
+// выбросить:
 
 describe('relax - server level', function(){
     describe('methods', function(){
