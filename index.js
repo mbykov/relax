@@ -120,7 +120,7 @@ Relax.prototype.view = function(desview, cb) {
     var host = this.opts.href;
     var parts = desview.split('/');
     var path = host + '/_design/' + parts[0] + '/_view/' + parts[1];
-    return request.get(path).query({include_docs:true}).query({limit:5}); //.query({include_docs: true})
+    return request.get(path).query({include_docs:true}).query({limit:5});
 
 };
 
