@@ -4,16 +4,66 @@
 //var assert = require('better-assert');
 //var app = express();
 var url = require('url');
-var relax = require('../../')();
+var Relax = require('../../');
+var relax = new Relax();
+var admin = new Relax('http://admin:kjre4317@localhost:5984');
 var db;
-//var relax = new Relax();
 
 // app.get('/login', function(req, res){
 //     res.send('<form id="login"></form>');
 // });
 // app.listen(5985);
 
-describe('view, show, list', function(){
+describe('_design doc', function(){
+    log('BEFORE')
+    var doc = {_id: 'some-id', text: 'some text', count: 0};
+    var byText = function(doc) {
+        emit(doc.text, null);
+    };
+    var ddoc = {_id: '_design/spec', views: {'byType': {map: byText.toString()} } };
+    before(function(done){
+        admin.create('relax-specs', function(err, res){
+            log('CREATE', err, res);
+            done();
+        })
+    })
+    before(function(done){
+        log('PUSHING DESING')
+        admin.dbname('relax-specs');
+        admin
+            .push(ddoc, function(err, res){
+                log('DDOC', err, res);
+                // (err == null).should.be.true;
+                // res.ok.should.be.ok;
+                done();
+            });
+    })
+    // after(function(done){
+    //     db = relax.dbname('http://admin:kjre4317@localhost:5984');
+    //     db.drop('relax-specs', function(err, res){
+    //         relax.dbname('http://localhost:5984/relax-specs');
+    //         done();
+    //     })
+    // })
+
+    describe('push', function(){
+        it('should push _design doc', function(done){
+            log('PUSHING DESING__')
+            // admin.dbname('relax-specs');
+            // admin
+            //     .push(ddoc, function(err, res){
+            //         log('DDOC', err, res);
+            //         // (err == null).should.be.true;
+            //         // res.ok.should.be.ok;
+            done();
+            //     });
+        })
+    })
+})
+
+return
+
+ describe('view, show, list', function(){
     var doc = {_id: 'some-id', body: 'some text', count: 0};
     describe('view', function(){
         it('should get docs from view', function(done){

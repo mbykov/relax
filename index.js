@@ -9,7 +9,7 @@ module.exports = Relax;
  */
 
 function Relax(uri) {
-    if (!(this instanceof Relax)) return new Relax(uri);
+    //if (!(this instanceof Relax)) return new Relax(uri);
     var defaults = url.parse('http://localhost:5984');
     //log(defaults)
     uri = uri || '';
@@ -191,7 +191,7 @@ function merge(a, b) {
     keys.forEach(function(key) {
         a[key] = b[key] || a[key];
     })
-    a.auth = b.auth;
+    //a.auth = b.auth;
     a.dbname = a.pathname.replace(/^\//,'');
     var auth = (a.auth) ? a.auth+'@' : '';
     a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname;
