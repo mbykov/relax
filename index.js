@@ -135,7 +135,6 @@ Relax.prototype.fdocs = function(res) {
 };
 
 
-
 Relax.prototype.getall = function(doc, cb) {
     var path = this.opts.href + '/_all_docs';
     request

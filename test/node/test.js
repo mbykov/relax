@@ -26,7 +26,7 @@ describe('view, show, list', function(){
                     done();
                 });
         })
-        it('should get docs from view', function(done){
+        it('should get docs from view with key', function(done){
             relax.dbname('http://localhost:5984/latin');
             relax
                 .view('latin/by_dict')
