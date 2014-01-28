@@ -14,13 +14,37 @@ var db;
 // });
 // app.listen(5985);
 
+return
+
 describe('view, show, list', function(){
     var doc = {_id: 'some-id', text: 'some text', count: 0};
-    var other = {_id: 'other-id', text: 'some text 1', count: 0};
+    var other = {_id: 'other-id', text: 'some other text', count: 0};
+    var hello = function(doc, req) {
+        log(doc);
+        log(req);
+        if (!doc) {
+            if (req.id) {
+                return [
+                    // Creates a new document with the PUT docid,
+                    { _id : req.id,
+                      reqs : [req] },
+                    // and returns an HTML response to the client.
+                    "<p>New World</p>"];
+            };
+            return [null, "<p>Empty World</p>"];
+        };
+        // we can update the document inline
+        doc.world = "hello";
+        // we can record aspects of the request or use them in application logic.
+        doc.reqs && doc.reqs.push(req);
+        doc.edited_by = req.userCtx;
+        return [doc, "<p>hello doc</p>"];
+    }
     var byText = function(doc) {
         emit(doc.text, null);
     };
-    var ddoc = {_id: '_design/spec', views: {'byText': {map: byText.toString()} } };
+    var ddoc = {_id: '_design/spec', views: {'byText': {map: byText.toString()} }, updates: {'hello': hello.toString} };
+
     before(function(done){
         admin.create('relax-specs', function(err, res){
             done();
@@ -72,44 +96,6 @@ describe('view, show, list', function(){
                     done();
                 });
         })
-    })
-})
-
-return
-
- describe('view, show, list', function(){
-    var doc = {_id: 'some-id', body: 'some text', count: 0};
-    describe('view', function(){
-        it('should get docs from view', function(done){
-            relax.dbname('http://localhost:5984/latin');
-            relax
-                .view('latin/by_dict')
-                .end(function(res){
-                    relax.fdocs(res).length.should.equal(5);
-                    //log(relax.fdocs(res));
-                    done();
-                });
-        })
-        it('should get docs from view with key', function(done){
-            relax.dbname('http://localhost:5984/latin');
-            relax
-                .view('latin/by_dict')
-                .query({key:'"aperio"'})
-                .end(function(res){
-                    relax.fdocs(res)[0].dict.should.equal('aperio')
-                    done();
-                });
-        })
-        //
-        // it('should not get doc if it does not exist', function(done){
-        //     relax
-        //         .get(doc)
-        //         .set('cache', true)
-        //         .end(function(res){
-        //             res.text.trim().should.equal('{"error":"not_found","reason":"missing"}')
-        //             done();
-        //         });
-        // })
     })
 })
 

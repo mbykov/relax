@@ -46,7 +46,8 @@ Relax.prototype.create = function(name, cb) {
 };
 
 Relax.prototype.drop = function(name, cb) {
-    var path = this.opts.href + name;
+    log(this.opts);
+    var path = this.opts.host + name;
     request.del(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
@@ -75,29 +76,6 @@ function postDoc(host, doc, cb) {
         .end(function(res) { cb(res) });
 }
 
-Relax.prototype.get = function(doc, cb) {
-    var path = this.opts.href + '/' + doc._id;
-    if (!cb) return request.get(path);
-    getDoc(path, function(res){
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
-}
-
-Relax.prototype.push = function(doc, cb) {
-    var host = this.opts.href;
-    getDoc(host + '/' + doc._id, function(res) {
-        if (res.ok) {
-            var dbdoc = JSON.parse(res.text);
-            doc._rev = dbdoc._rev;
-        }
-        postDoc(host, doc, function(res) {
-            var json = JSON.parse(res.text.trim());
-            (res.ok) ? cb(null, json) : cb(json, null);
-        });
-    })
-};
-
 Relax.prototype.del = function(doc, cb) {
     var host = this.opts.href;
     getDoc(host + '/' + doc._id, function(res) {
@@ -115,12 +93,45 @@ Relax.prototype.del = function(doc, cb) {
     });
 };
 
+Relax.prototype.push = function(doc, cb) {
+    var host = this.opts.href;
+    getDoc(host + '/' + doc._id, function(res) {
+        if (res.ok) {
+            var dbdoc = JSON.parse(res.text);
+            doc._rev = dbdoc._rev;
+        }
+        postDoc(host, doc, function(res) {
+            var json = JSON.parse(res.text.trim());
+            (res.ok) ? cb(null, json) : cb(json, null);
+        });
+    })
+};
+
+Relax.prototype.get = function(doc, cb) {
+    var path = this.opts.href + '/' + doc._id;
+    if (!cb) return request.get(path);
+    getDoc(path, function(res){
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
+
 Relax.prototype.view = function(desview, cb) {
     if (cb) return cb(false);
     var host = this.opts.href;
     var parts = desview.split('/');
     var path = host + '/_design/' + parts[0] + '/_view/' + parts[1];
     return request.get(path).query({include_docs:true}).query({limit:5});
+
+};
+
+Relax.prototype.update = function(desupdate, doc, cb) {
+    if (cb) return cb(false);
+    var host = this.opts.href;
+    var parts = desupdate.split('/');
+    var path = host + '/_design/' + parts[0] + '/_update/' + parts[1];
+    return (doc && doc._id) ? request.put(path + '/' + doc._id) : request.post(path);
+    //return request.get(path);
 
 };
 
