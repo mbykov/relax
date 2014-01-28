@@ -46,8 +46,7 @@ Relax.prototype.create = function(name, cb) {
 };
 
 Relax.prototype.drop = function(name, cb) {
-    log(this.opts);
-    var path = this.opts.host + name;
+    var path = this.opts.server+'/'+name;
     request.del(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
@@ -205,7 +204,9 @@ function merge(a, b) {
     //a.auth = b.auth;
     a.dbname = a.pathname.replace(/^\//,'');
     var auth = (a.auth) ? a.auth+'@' : '';
-    a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname;
+    a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname; // FIXME: убрать
+    a.server = a.protocol+'//'+auth+a.host;
+    a.url = a.server+'/'+a.dbname;
     return a;
 };
 
