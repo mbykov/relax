@@ -87,11 +87,24 @@ Relax.prototype.get = function(doc, cb) {
 Relax.prototype.allDocs = function(docs, cb) {
     var path = this.opts.url + '/_all_docs';
     if (!cb) return request.post(path);
-    postDoc(path, docs, function(res){
+    var keys = {keys: map(docs, function(doc) { return doc._id})};
+    postDoc(path, keys, function(res){
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(json, null);
     });
 }
+
+Relax.prototype.bulkDocs = function(docs, cb) {
+    // TODO: =========================================================
+    var path = this.opts.url + '/_all_docs';
+    if (!cb) return request.post(path);
+    var keys = {keys: map(docs, function(doc) { return doc._id})};
+    postDoc(path, keys, function(res){
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
+
 
 
 

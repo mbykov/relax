@@ -21,7 +21,25 @@ describe('doc-crud methods', function(){
         admin.drop('relax-specs', function(err, res){ done()});
     })
 
-    describe('chainable', function(){
+    describe('array with callbacks', function(){
+        var docs = utils.makeDocs(5);
+        it('should not bulk get docs if its do not exist', function(done){
+            relax.allDocs(docs, function(err, res){
+                (err == null).should.be.true;
+                res.rows[0].error.should.equal('not_found');
+                done();
+            })
+        })
+        it('should bulk save docs w/o ids', function(done){
+            relax.bulkSave(docs, function(err, res){
+                log(res.text)
+                //(err) ? err.error.should.equal('not_found') : res.body.should.equal('some text');
+                done();
+            })
+        })
+    })
+
+    describe('single doc with callbacks', function(){
         it('should not get doc if it does not exist', function(done){
             relax.get(doc, function(err, res){
                 (err) ? err.error.should.equal('not_found') : res.body.should.equal('some text');
