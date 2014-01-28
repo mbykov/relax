@@ -4,6 +4,7 @@
 //var app = express();
 var url = require('url');
 var Relax = require('../../');
+var utils = require('./utils');
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 //var db;
@@ -40,12 +41,20 @@ describe('view method', function(){
                 done();
             });
     })
-    // FIXME: !!!! ==  DELETE /relax-specsrelax-specs 404
-    after(function(done){
-        admin.drop('relax-specs', function(err, res){
-            done();
-        })
+    before(function(done){
+        var docs = utils.makeDocs(10);
+        relax.dbname('relax-specs')
+            .push(docs, function(err, res){
+                log('===', err, res)
+                done();
+            });
     })
+
+    // after(function(done){
+    //     admin.drop('relax-specs', function(err, res){
+    //         done();
+    //     })
+    // })
 
     describe('view chainable', function(){
         it('should get docs from view', function(done){
