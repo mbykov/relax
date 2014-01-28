@@ -1,13 +1,13 @@
 //
 //var express = require('express');
-//var assert = require('better-assert');
 //var app = express();
 var url = require('url');
 var Relax = require('../../');
 var utils = require('./utils');
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
-//var db;
+
+return;
 
 describe('view method', function(){
     var doc = {_id: 'some-id', text: 'some text', count: 0};
@@ -50,11 +50,11 @@ describe('view method', function(){
             });
     })
 
-    // after(function(done){
-    //     admin.drop('relax-specs', function(err, res){
-    //         done();
-    //     })
-    // })
+    after(function(done){
+        admin.drop('relax-specs', function(err, res){
+            done();
+        })
+    })
 
     describe('view chainable', function(){
         it('should get docs from view', function(done){

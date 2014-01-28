@@ -6,6 +6,7 @@
   "keywords": [],
     "dependencies": {
         "visionmedia/superagent": "*",
+        "juliangruber/isarray": "*",
         "component/map": "*",
         "component/url": "*"
     },

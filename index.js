@@ -1,4 +1,5 @@
 var url = require('url');
+var isArray = require('isarray');
 var map = require('map-component'); // FIXME: try etc
 var request = require('superagent');
 
@@ -18,7 +19,6 @@ function Relax(uri) {
     return this;
 }
 
-//return request.get(this.opts.href);
 /*
  * Setters
 */
@@ -75,6 +75,26 @@ function postDoc(host, doc, cb) {
         .end(function(res) { cb(res) });
 }
 
+Relax.prototype.get = function(doc, cb) {
+    var path = this.opts.url + '/' + doc._id;
+    if (!cb) return request.get(path);
+    getDoc(path, function(res) {
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
+
+Relax.prototype.allDocs = function(docs, cb) {
+    var path = this.opts.url + '/_all_docs';
+    if (!cb) return request.post(path);
+    postDoc(path, docs, function(res){
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
+
+
+
 Relax.prototype.del = function(doc, cb) {
     var host = this.opts.href;
     getDoc(host + '/' + doc._id, function(res) {
@@ -105,15 +125,6 @@ Relax.prototype.push = function(doc, cb) {
         });
     })
 };
-
-Relax.prototype.get = function(doc, cb) {
-    var path = this.opts.href + '/' + doc._id;
-    if (!cb) return request.get(path);
-    getDoc(path, function(res){
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
-}
 
 Relax.prototype.view = function(desview, cb) {
     if (cb) return cb(false);
