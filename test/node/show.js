@@ -67,6 +67,16 @@ describe('show method', function(){
                     done();
                 });
         })
+        it('should respond on missing func', function(done){
+            relax
+                .show('spec/justMissingText')
+                .get('missingDoc')
+                .end(function(res){
+                    (res.ok == false).should.be.true;
+                    JSON.parse(res.text).error.should.equal('not_found');
+                    done();
+                });
+        })
     })
 })
 
