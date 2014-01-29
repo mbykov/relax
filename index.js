@@ -169,10 +169,16 @@ Relax.prototype.del = function(doc, cb) {
 
 Relax.prototype.view = function(method, cb) {
     if (cb) return cb(false);
-    var host = (this.opts.tmp || this.opts.url);
-    this.opts.tmp = null;
+    //var host = (this.opts.tmp || this.opts.url);
     var parts = method.split('/');
-    var path = host + '/_design/' + parts[0] + '/_view/' + parts[1];
+    if (this.opts.tmp) {
+        var host = this.opts.tmp;
+        //var path = host + '/' + parts[0] + '/' + parts[1];
+        var path = host + '/' + parts[1];
+        this.opts.tmp = null;
+    } else {
+        var path = host + '/_design/' + parts[0] + '/_view/' + parts[1];
+    }
     return request.get(path).query({include_docs:true}).query({limit:5});
 };
 
@@ -185,6 +191,9 @@ Relax.prototype.show = function(method) {
 };
 
 Relax.prototype.list = function(method) {
+    // /relax-specs/_design/spec/_list/basicList/_design/spec/_view/basicView?include_docs=true&limit=5 404
+    // /relax-specs/_design/spec/_list/basicList/spec/basicView?include_docs=true&limit=5 500
+    // /relax-specs/_design/spec/_list/basicList/basicView?include_docs=true&limit=5
     var parts = method.split('/');
     var path = this.opts.url + '/_design/' + parts[0] + '/_list/' + parts[1];
     this.opts.tmp = path;

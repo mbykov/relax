@@ -14,10 +14,14 @@ describe('LIST method', function(){
     var doc = {_id: 'some-id', text: 'some text', count: 0};
     var other = {_id: 'other-id', text: 'some other text', count: 0};
 
-    var basicView = {
-        map: function(doc) {
-            emit(doc.integer, doc.string);
-        }
+    // var basicView = {
+    //     map: function(doc) {
+    //         emit(doc.integer, doc.string);
+    //     }
+    // };
+
+    var basicView = function(doc) {
+        emit(doc.text, doc.count);
     };
 
     var withReduce = {
@@ -34,16 +38,16 @@ describe('LIST method', function(){
     };
 
     var basicList = function(head, req) {
-        send("head");
         var row;
         while(row = getRow()) {
-            log("row: "+toJSON(row));
+            //log('ROW', row);
             send(row.key);
         };
-        return "tail";
+        return;
     };
 
-    var ddoc = {_id: '_design/spec', lists: {'basicList': basicList.toString() }, views:{'basicView': basicView.toString(), 'withReduce': withReduce.toString()} };
+    //var ddoc = {_id: '_design/spec', views: {'byText': {map: byText.toString()} } };
+    var ddoc = {_id: '_design/spec', lists: {'basicList': basicList.toString() }, views: {'basicView': {map: basicView.toString()} } };
 
     before(function(done){
         admin.create('relax-specs', function(err, res){
@@ -62,22 +66,20 @@ describe('LIST method', function(){
                 done();
             });
     })
-    // after(function(done){
-    //     admin.drop('relax-specs', function(err, res){
-    //         done();
-    //     })
-    // })
+    after(function(done){
+        admin.drop('relax-specs', function(err, res){
+            done();
+        })
+    })
 
     describe('list', function(){
-        it('should show existing doc', function(done){
+        it('should list existing doc', function(done){
             relax
                 .list('spec/basicList')
                 .view('spec/basicView')
                 .end(function(res){
-                    log(res.text);
-                    //res.text.should.equal('just some text');
-                    //relax.fdocs(res).length.should.equal(2);
-                    //relax.fdocs(res)[0].text.should.equal('some other text'); // due to collation
+                    res.ok.should.be.ok;
+                    res.text.should.equal('some text');
                     done();
                 });
         })
