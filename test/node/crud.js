@@ -8,7 +8,9 @@ var relax = new Relax();
 relax.dbname('relax-specs')
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-describe('doc(s)-crud methods', function(){
+return;
+
+describe('doc(s)-CRUD methods', function(){
     var doc = {_id: 'some-id', body: 'some text', count: 0};
     before(function(done){
         admin.create('relax-specs', function(err, res){ done()});

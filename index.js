@@ -169,7 +169,8 @@ Relax.prototype.del = function(doc, cb) {
 
 Relax.prototype.view = function(method, cb) {
     if (cb) return cb(false);
-    var host = this.opts.href;
+    var host = (this.opts.tmp || this.opts.url);
+    this.opts.tmp = null;
     var parts = method.split('/');
     var path = host + '/_design/' + parts[0] + '/_view/' + parts[1];
     return request.get(path).query({include_docs:true}).query({limit:5});
@@ -183,14 +184,20 @@ Relax.prototype.show = function(method) {
     return this;
 };
 
-Relax.prototype.update = function(desupdate, doc, cb) {
-    if (cb) return cb(false);
-    var host = this.opts.href;
-    var parts = desupdate.split('/');
-    var path = host + '/_design/' + parts[0] + '/_update/' + parts[1];
-    return (doc && doc._id) ? request.put(path + '/' + doc._id) : request.post(path);
-    //return request.get(path);
+Relax.prototype.list = function(method) {
+    var parts = method.split('/');
+    var path = this.opts.url + '/_design/' + parts[0] + '/_list/' + parts[1];
+    this.opts.tmp = path;
+    return this;
+};
 
+Relax.prototype.update = function(method, doc, cb) {
+    // FIXME:
+    if (cb) return cb(false);
+    var docid = (doc && doc.constructor == Object) ? doc._id : doc;
+    var parts = method.split('/');
+    var path = this.opts.url + '/_design/' + parts[0] + '/_update/' + parts[1];
+    return (doc && docid) ? request.put(path + '/' + docid) : request.post(path);
 };
 
 function docs(res) {
