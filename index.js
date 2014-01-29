@@ -75,7 +75,9 @@ Relax.prototype.get = function(doc, cb) {
         allDocs(url, doc, cb);
         return;
     }
-    var path = this.opts.url + '/' + doc._id;
+    var docid = (doc.constructor == Object) ? doc._id : doc;
+    var path = (this.opts.tmp || this.opts.url) + '/' + docid;
+    this.opts.tmp = null;
     if (!cb) return request.get(path);
     getDoc(path, function(res) {
         var json = JSON.parse(res.text.trim());
@@ -165,13 +167,20 @@ Relax.prototype.del = function(doc, cb) {
     });
 };
 
-Relax.prototype.view = function(desview, cb) {
+Relax.prototype.view = function(method, cb) {
     if (cb) return cb(false);
     var host = this.opts.href;
-    var parts = desview.split('/');
+    var parts = method.split('/');
     var path = host + '/_design/' + parts[0] + '/_view/' + parts[1];
     return request.get(path).query({include_docs:true}).query({limit:5});
+};
 
+Relax.prototype.show = function(method) {
+    var url = this.opts.url;
+    var parts = method.split('/');
+    var path = url + '/_design/' + parts[0] + '/_show/' + parts[1];
+    this.opts.tmp = path;
+    return this;
 };
 
 Relax.prototype.update = function(desupdate, doc, cb) {

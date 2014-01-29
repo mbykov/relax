@@ -7,16 +7,21 @@ var utils = require('./utils');
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-return;
-
-describe('view method', function(){
+describe('show method', function(){
     var doc = {_id: 'some-id', text: 'some text', count: 0};
     var other = {_id: 'other-id', text: 'some other text', count: 0};
-    var byText = function(doc) {
-        emit(doc.text, null);
+
+    var justText = function(doc, req) {
+        if (doc) {
+            return { body : "just " + doc.text };
+        }
+        return {
+            body : "no such doc",
+            code : 404
+        };
     };
 
-    var ddoc = {_id: '_design/spec', views: {'byText': {map: byText.toString()} } };
+    var ddoc = {_id: '_design/spec', shows: {'justText': justText.toString() } };
 
     before(function(done){
         admin.create('relax-specs', function(err, res){
@@ -35,20 +40,6 @@ describe('view method', function(){
                 done();
             });
     })
-    before(function(done){
-        relax.dbname('relax-specs')
-            .push(other, function(err, res){
-                done();
-            });
-    })
-    before(function(done){
-        var docs = utils.makeDocs(10);
-        relax.dbname('relax-specs')
-            .push(docs, function(err, res){
-                log('===', err, res)
-                done();
-            });
-    })
 
     after(function(done){
         admin.drop('relax-specs', function(err, res){
@@ -56,23 +47,23 @@ describe('view method', function(){
         })
     })
 
-    describe('view chainable', function(){
-        it('should get docs from view', function(done){
+    describe('show', function(){
+        it('should show existing doc', function(done){
             relax
-                .view('spec/byText')
+                .show('spec/justText')
+                .get(doc)
                 .end(function(res){
-                    relax.fdocs(res).length.should.equal(2);
-                    relax.fdocs(res)[0].text.should.equal('some other text'); // due to collation
+                    res.text.should.equal('just some text');
                     done();
                 });
         })
-        it('should get docs from view with key', function(done){
+        it('should respond on missing doc', function(done){
             relax
-                .view('spec/byText')
-                .query({key:'"some text"'})
+                .show('spec/justText')
+                .get('missingDoc')
                 .end(function(res){
-                    relax.fdocs(res).length.should.equal(1);
-                    relax.fdocs(res)[0].text.should.equal('some text');
+                    res.status.should.equal(404);
+                    res.text.should.equal('no such doc');
                     done();
                 });
         })
