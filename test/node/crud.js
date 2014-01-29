@@ -8,7 +8,7 @@ var relax = new Relax();
 relax.dbname('relax-specs')
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-describe('doc-crud methods', function(){
+describe('doc(s)-crud methods', function(){
     var doc = {_id: 'some-id', body: 'some text', count: 0};
     before(function(done){
         admin.create('relax-specs', function(err, res){ done()});
@@ -21,22 +21,37 @@ describe('doc-crud methods', function(){
         admin.drop('relax-specs', function(err, res){ done()});
     })
 
-    describe('array with callbacks', function(){
+    describe('array with callback', function(){
         var docs = utils.makeDocs(5);
-        it('should not bulk get docs if its do not exist', function(done){
-            relax.allDocs(docs, function(err, res){
+        it('should not get all docs which not exist', function(done){
+            relax.get(docs, function(err, res){
                 (err == null).should.be.true;
                 res.rows[0].error.should.equal('not_found');
                 done();
             })
         })
-        it('should bulk save docs w/o ids', function(done){
-            relax.bulkSave(docs, function(err, res){
-                log(res.text)
+        it('should bulk save docs in empty db', function(done){
+            relax.push(docs, function(err, res){
+                (err == null).should.be.true;
+                res[0].ok.should.be.ok;
+                done();
+            })
+        })
+        it('should bulk save docs', function(done){
+            relax.push(docs, function(err, res){
+                //log('2222', err, res)
+                //(err == null).should.be.true;
                 //(err) ? err.error.should.equal('not_found') : res.body.should.equal('some text');
                 done();
             })
         })
+        // it('should get all docs with _all_docs', function(done) {
+        //     relax.get(docs, function(err, res){
+        //         (err == null).should.be.true;
+        //         log(err, res)
+        //         done();
+        //     })
+        // })
     })
 
     describe('single doc with callbacks', function(){
@@ -66,9 +81,9 @@ describe('doc-crud methods', function(){
         it('should push doc if it exists in DB or does not', function(done){
             relax
                 .push(doc, function(err, res){
-                    log(res.text)
-                    // (err == null).should.be.true;
-                    // res.ok.should.be.ok;
+                    //log(res.text)
+                    (err == null).should.be.true;
+                    res.ok.should.be.ok;
                     done();
                 })
         })

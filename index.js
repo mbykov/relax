@@ -68,14 +68,13 @@ function getDoc(path, cb) {
         .end(function(res) { cb(res) });
 }
 
-function postDoc(host, doc, cb) {
-    request
-        .post(host)
-        .send(doc)
-        .end(function(res) { cb(res) });
-}
-
 Relax.prototype.get = function(doc, cb) {
+    if (isArray(doc)) {
+        var url = this.opts.url + '/_all_docs';
+        if (!cb) return request.post(url);
+        allDocs(url, doc, cb);
+        return;
+    }
     var path = this.opts.url + '/' + doc._id;
     if (!cb) return request.get(path);
     getDoc(path, function(res) {
@@ -84,29 +83,70 @@ Relax.prototype.get = function(doc, cb) {
     });
 }
 
-Relax.prototype.allDocs = function(docs, cb) {
-    var path = this.opts.url + '/_all_docs';
-    if (!cb) return request.post(path);
+function allDocs(url, docs, cb) {
     var keys = {keys: map(docs, function(doc) { return doc._id})};
-    postDoc(path, keys, function(res){
+    postDoc(url, keys, function(res){
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(json, null);
     });
 }
 
-Relax.prototype.bulkDocs = function(docs, cb) {
-    // TODO: =========================================================
-    var path = this.opts.url + '/_all_docs';
-    if (!cb) return request.post(path);
-    var keys = {keys: map(docs, function(doc) { return doc._id})};
-    postDoc(path, keys, function(res){
+function postDoc(host, doc, cb) {
+    request
+        .post(host)
+        .send(doc)
+        .end(function(res) { cb(res) });
+}
+
+Relax.prototype.push = function(doc, cb) {
+    if (isArray(doc)) {
+        var docs = doc;
+        var alldocs = this.opts.url + '/_all_docs';
+        var bulkdocs = this.opts.url + '/_bulk_docs';
+        allDocs(alldocs, docs, function(err, res) {
+            var rows = res.rows;
+            for (var i = 0; i < docs.length; i++) {
+                var rev = rows[i];
+                //log('REV', rev.value)
+                if (rev.value) docs[i]._rev = rows[i].value.rev;
+                docs[i].kuku = true;
+            }
+            if (!cb) return request.post(bulkdocs);
+            bulkSave(bulkdocs, docs, cb);
+        });
+        return;
+    }
+    var host = this.opts.href;
+    getDoc(host + '/' + doc._id, function(res) {
+        if (res.ok) {
+            var dbdoc = JSON.parse(res.text);
+            doc._rev = dbdoc._rev;
+        }
+        postDoc(host, doc, function(res) {
+            var json = JSON.parse(res.text.trim());
+            (res.ok) ? cb(null, json) : cb(json, null);
+        });
+    })
+};
+
+function bulkSave(url, docs, cb) {
+    postDoc(url, {docs: docs}, function(res){
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(json, null);
     });
 }
 
-
-
+Relax.prototype.bulkSave_ = function(docs, cb) {
+    // TODO: если нет docs
+    // полный ли аналог update? Сделать тест
+    var path = this.opts.url + '/_bulk_docs';
+    docs = {docs: docs};
+    if (!cb) return request.post(path);
+    postDoc(path, docs, function(res){
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
 
 Relax.prototype.del = function(doc, cb) {
     var host = this.opts.href;
@@ -123,20 +163,6 @@ Relax.prototype.del = function(doc, cb) {
             cb(null, JSON.parse(res.text))
         }
     });
-};
-
-Relax.prototype.push = function(doc, cb) {
-    var host = this.opts.href;
-    getDoc(host + '/' + doc._id, function(res) {
-        if (res.ok) {
-            var dbdoc = JSON.parse(res.text);
-            doc._rev = dbdoc._rev;
-        }
-        postDoc(host, doc, function(res) {
-            var json = JSON.parse(res.text.trim());
-            (res.ok) ? cb(null, json) : cb(json, null);
-        });
-    })
 };
 
 Relax.prototype.view = function(desview, cb) {
@@ -237,6 +263,19 @@ function merge(a, b) {
 function log () { console.log.apply(console, arguments) }
 
 /*
+
+  Relax.prototype.allDocs_ = function(docs, cb) {
+  var path = this.opts.url + '/_all_docs';
+  if (!cb) return request.post(path);
+  var keys = {keys: map(docs, function(doc) { return doc._id})};
+  postDoc(path, keys, function(res){
+  var json = JSON.parse(res.text.trim());
+  (res.ok) ? cb(null, json) : cb(json, null);
+  });
+  }
+
+
+
 
   Relax.prototype.get_ = function(doc, cb) {
   var path = this.opts.href + '/' + doc._id;

@@ -1,5 +1,4 @@
 //
-//var request = require('../..');
 //var express = require('express');
 //var assert = require('better-assert');
 //var app = express();
@@ -15,8 +14,6 @@ var db;
 // app.listen(5985);
 
 return
-
-return;
 
 describe('relax - db level', function(){
     before(function(){
