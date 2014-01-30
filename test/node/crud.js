@@ -70,14 +70,6 @@ describe('doc(s)-CRUD methods', function(){
                 done();
             })
         })
-        return;
-        it('should bulk delete existing docs', function(done){
-            relax.del(docs, function(err, res){
-                (err == null).should.be.true;
-                res.forEach(function(row) {row.id.should.be.ok});
-                done();
-            })
-        })
         it('should bulk delete existing docs', function(done){
             relax.del(docs, function(err, res){
                 (err == null).should.be.true;
@@ -86,19 +78,21 @@ describe('doc(s)-CRUD methods', function(){
             })
         })
     })
-return;
-    describe('array of docs - chainable', function(){
+
+    describe('array of docs - get.chainable', function(){
         it('should not get docs which not exist', function(done){
-            relax.get(docs)
-            .end(function(res){
-                JSON.parse(res.text).total_rows.should.equal(0);
-                JSON.parse(res.text).offset.should.equal(0);
-                done();
-            })
+            relax
+                .get(docs)
+                .end(function(res){
+                    JSON.parse(res.text).total_rows.should.equal(0);
+                    JSON.parse(res.text).offset.should.equal(0);
+                    done();
+                })
         })
         it('should not get non-existing docs by keys as well', function(done){
             var keys = map(doc, function(doc) { return doc._id});
-            relax.get(keys)
+            relax
+                .get(keys)
                 .end(function(res){
                     JSON.parse(res.text).total_rows.should.equal(0);
                     JSON.parse(res.text).offset.should.equal(0);
@@ -106,30 +100,28 @@ return;
                 })
         })
         it('should bulk save docs in empty db', function(done){
-            relax.push(docs)
-                .end(function(res){
-                    //log(res);
-                    // res.forEach(function(row) {row.ok.should.be.true});
+            relax
+                .push(docs, function(err, res){
+                    (err == null).should.be.true;
+                    res.forEach(function(row) {row.ok.should.be.true});
                     done();
                 })
         })
-return;
-        // it('should bulk save the same docs again', function(done){
-        //     relax.push(docs, function(err, res){
-        //         res.forEach(function(row) {row.ok.should.be.true});
-        //         (err == null).should.be.true;
-        //         done();
-        //     })
-        // })
-        // it('should get all existing docs', function(done){
-        //     relax.get(docs, function(err, res){
-        //         (err == null).should.be.true;
-        //         res.rows.forEach(function(row) {row.id.should.be.ok});
-        //         done();
-        //     })
-        // })
+        it('should get existing docs', function(done){
+            relax
+                .get(docs)
+                .query({include_docs: true})
+                .end(function(res){
+                    var rows = JSON.parse(res.text).rows;
+                    JSON.parse(res.text).total_rows.should.equal(5);
+                    JSON.parse(res.text).offset.should.equal(0);
+                    rows.forEach(function(row) {row.id.should.be.ok});
+                    rows.forEach(function(row) {row.doc.text.should.equal('some text')});
+                    done();
+                })
+        })
     })
-return;
+
     describe('single doc with callbacks', function(){
         it('should not get doc if it does not exist', function(done){
             relax.get(doc, function(err, res){

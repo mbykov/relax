@@ -71,8 +71,6 @@ function allDocs(url, docs, cb) {
     var keys = {keys: map(docs, function(doc) { return (doc.constructor == Object) ? doc._id : doc})};
     postDoc(url, keys, function(res){
         var json = JSON.parse(res.text.trim());
-        // log('ALL_DOCS', url);
-        // log('=== K', fdocs(res));
         (res.ok) ? cb(null, json) : cb(json, null);
     });
 }
@@ -108,7 +106,6 @@ Relax.prototype.fdocs = function(res) {
 Relax.prototype.get = function(doc, cb) {
     if (isArray(doc)) {
         var url = this.opts.url + '/_all_docs';
-        // FIXME include_docs?
         if (!cb) return request.post(url).send({docs: doc});
         allDocs(url, doc, cb);
         return;
@@ -133,9 +130,9 @@ Relax.prototype.push = function(doc, cb) {
             for (var i = 0; i < docs.length; i++) {
                 var rev = rows[i];
                 if (rev.value) docs[i]._rev = rows[i].value.rev;
+                docs[i]._deleted = false;
             }
-            //log('!! CB', request.post(bulkdocs).send({docs: doc}) );
-            if (!cb) return request.post(bulkdocs).send({docs: doc});
+            //if (!cb) return request.post(alldocs).send({docs: doc}); // alas (((:
             bulkSave(bulkdocs, docs, cb);
         });
         return;
