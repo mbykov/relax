@@ -101,13 +101,13 @@ Relax.prototype.fdocs = function(res) {
 };
 
 /*
- * CRUD methods for doc and docs array
+ * CRUD methods for doc or docs array
 */
 
 Relax.prototype.get = function(doc, cb) {
     if (isArray(doc)) {
         var url = this.opts.url + '/_all_docs';
-        if (!cb) return request.post(url);
+        if (!cb) return request.post(url).send({docs: doc});
         allDocs(url, doc, cb);
         return;
     }
@@ -137,13 +137,13 @@ Relax.prototype.push = function(doc, cb) {
         });
         return;
     }
-    var host = this.opts.href;
-    getDoc(host + '/' + doc._id, function(res) {
+    var url = this.opts.href;
+    getDoc(url + '/' + doc._id, function(res) {
         if (res.ok) {
             var dbdoc = JSON.parse(res.text);
             doc._rev = dbdoc._rev;
         }
-        postDoc(host, doc, function(res) {
+        postDoc(url, doc, function(res) {
             var json = JSON.parse(res.text.trim());
             (res.ok) ? cb(null, json) : cb(json, null);
         });
@@ -151,13 +151,29 @@ Relax.prototype.push = function(doc, cb) {
 };
 
 Relax.prototype.del = function(doc, cb) {
-    var host = this.opts.href;
-    getDoc(host + '/' + doc._id, function(res) {
+    if (isArray(doc)) {
+        var docs = doc;
+        var alldocs = this.opts.url + '/_all_docs';
+        var bulkdocs = this.opts.url + '/_bulk_docs';
+        allDocs(alldocs, docs, function(err, res) {
+            var rows = res.rows;
+            for (var i = 0; i < docs.length; i++) {
+                var rev = rows[i];
+                if (rev.value) docs[i]._rev = rows[i].value.rev;
+                docs[i]._deleted = true;
+            }
+            if (!cb) return request.post(bulkdocs);
+            bulkSave(bulkdocs, docs, cb);
+        });
+        return;
+    }
+    var url = this.opts.url;
+    getDoc(url + '/' + doc._id, function(res) {
         if (res.ok) {
             var dbdoc = JSON.parse(res.text);
             doc._rev = dbdoc._rev;
             doc._deleted = true;
-            postDoc(host, doc, function(res) {
+            postDoc(url, doc, function(res) {
                 var json = JSON.parse(res.text.trim());
                 (res.ok) ? cb(null, json) : cb(json, null);
             });
@@ -170,8 +186,8 @@ Relax.prototype.del = function(doc, cb) {
 Relax.prototype.view = function(method, cb) {
     var parts = method.split('/');
     if (this.opts.tmp) {
-        var host = this.opts.tmp;
-        var path = host + '/' + parts[1];
+        var url = this.opts.tmp;
+        var path = url + '/' + parts[1];
         this.opts.tmp = null;
     } else {
         var path = this.opts.url + '/_design/' + parts[0] + '/_view/' + parts[1];

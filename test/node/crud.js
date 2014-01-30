@@ -1,7 +1,8 @@
 //
 //var express = require('express');
 //var app = express();
-var url = require('url');
+//var url = require('url');
+var map = require('map-component'); // FIXME: try etc
 var Relax = require('../../');
 var utils = require('./utils');
 var relax = new Relax();
@@ -29,6 +30,69 @@ describe('doc(s)-CRUD methods', function(){
                 res.rows.forEach(function(row) {row.error.should.equal('not_found')});
                 done();
             })
+        })
+        it('should bulk save docs in empty db', function(done){
+            relax.push(docs, function(err, res){
+                (err == null).should.be.true;
+                res.forEach(function(row) {row.ok.should.be.true});
+                done();
+            })
+        })
+        it('should bulk save the same docs again', function(done){
+            relax.push(docs, function(err, res){
+                res.forEach(function(row) {row.ok.should.be.true});
+                (err == null).should.be.true;
+                done();
+            })
+        })
+        it('should get all existing docs', function(done){
+            relax.get(docs, function(err, res){
+                (err == null).should.be.true;
+                res.rows.forEach(function(row) {row.id.should.be.ok});
+                done();
+            })
+        })
+        it('should get all existing docs by their _ids', function(done){
+            var keys = map(doc, function(doc) { return doc._id});
+            relax.get(keys, function(err, res){
+                (err == null).should.be.true;
+                res.rows.forEach(function(row) {row.id.should.be.ok});
+                done();
+            })
+        })
+        it('should bulk delete existing docs', function(done){
+            relax.del(docs, function(err, res){
+                (err == null).should.be.true;
+                res.forEach(function(row) {row.id.should.be.ok});
+                done();
+            })
+        })
+        it('should bulk delete existing docs', function(done){
+            relax.del(docs, function(err, res){
+                (err == null).should.be.true;
+                res.forEach(function(row) {row.id.should.be.ok});
+                done();
+            })
+        })
+    })
+
+    describe('array of docs - chainable', function(){
+        it('should not get docs which not exist', function(done){
+            relax.get(docs)
+            .end(function(res){
+                JSON.parse(res.text).total_rows.should.equal(0);
+                JSON.parse(res.text).offset.should.equal(0);
+                done();
+            })
+        })
+        it('should not get non-existing docs by keys as well', function(done){
+            var keys = map(doc, function(doc) { return doc._id});
+            relax.get(keys)
+                .end(function(res){
+                    JSON.parse(res.text).total_rows.should.equal(0);
+                    JSON.parse(res.text).offset.should.equal(0);
+                    done();
+                })
         })
         it('should bulk save docs in empty db', function(done){
             relax.push(docs, function(err, res){
