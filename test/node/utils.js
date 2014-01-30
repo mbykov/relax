@@ -13,6 +13,7 @@ utils.prototype.makeDocs = function(start, stop) {
         var doc = {};
         doc._id = i.toString();
         doc.count = i;
+        doc.text = 'some text';
         docs.push(doc);
     }
     return docs;
