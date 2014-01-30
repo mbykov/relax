@@ -7,7 +7,7 @@ var utils = require('./utils');
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-//return;
+return;
 
 describe('VIEW method', function(){
     var doc = {_id: 'some-id', text: 'some text', count: 1};

@@ -5,45 +5,49 @@ var url = require('url');
 var Relax = require('../../');
 var utils = require('./utils');
 var relax = new Relax();
-relax.dbname('relax-specs')
+relax.dbname('relax-specs');
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
-
-return;
+var docs = utils.makeDocs(5);
 
 describe('doc(s)-CRUD methods', function(){
     var doc = {_id: 'some-id', body: 'some text', count: 0};
     before(function(done){
-        admin.create('relax-specs', function(err, res){ done()});
+        admin.create('relax-specs', function(err, res) { done()});
     })
     // before(function(done){
-    //     relax.dbname('relax-specs')
+    //     relax
     //         .push(doc, function(err, res){ done() });
     // })
     after(function(done){
-        admin.drop('relax-specs', function(err, res){ done()});
+        admin.drop('relax-specs', function(err, res) { done()});
     })
 
-    describe('array with callback', function(){
-        var docs = utils.makeDocs(5);
-        it('should not get all docs which not exist', function(done){
+    describe('array of docs with callback', function(){
+        it('should not get docs which not exist, surprise', function(done){
             relax.get(docs, function(err, res){
                 (err == null).should.be.true;
-                res.rows[0].error.should.equal('not_found');
+                res.rows.forEach(function(row) {row.error.should.equal('not_found')});
                 done();
             })
         })
         it('should bulk save docs in empty db', function(done){
             relax.push(docs, function(err, res){
                 (err == null).should.be.true;
-                res[0].ok.should.be.ok;
+                res.forEach(function(row) {row.ok.should.be.true});
                 done();
             })
         })
-        it('should bulk save docs', function(done){
+        it('should bulk save the same docs again', function(done){
             relax.push(docs, function(err, res){
-                //log('2222', err, res)
-                //(err == null).should.be.true;
-                //(err) ? err.error.should.equal('not_found') : res.body.should.equal('some text');
+                res.forEach(function(row) {row.ok.should.be.true});
+                (err == null).should.be.true;
+                done();
+            })
+        })
+        it('should get all existing docs', function(done){
+            relax.get(docs, function(err, res){
+                (err == null).should.be.true;
+                res.rows.forEach(function(row) {row.id.should.be.ok});
                 done();
             })
         })

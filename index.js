@@ -12,7 +12,6 @@ module.exports = Relax;
 function Relax(uri) {
     //if (!(this instanceof Relax)) return new Relax(uri);
     var defaults = url.parse('http://localhost:5984');
-    //log(defaults)
     uri = uri || '';
     var opts = url.parse(uri)
     this.opts = merge(defaults, opts);
@@ -68,6 +67,43 @@ function getDoc(path, cb) {
         .end(function(res) { cb(res) });
 }
 
+function allDocs(url, docs, cb) {
+    var keys = {keys: map(docs, function(doc) { return doc._id})};
+    postDoc(url, keys, function(res){
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
+
+function postDoc(host, doc, cb) {
+    request
+        .post(host)
+        .send(doc)
+        .end(function(res) { cb(res) });
+}
+
+function bulkSave(url, docs, cb) {
+    postDoc(url, {docs: docs}, function(res){
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
+
+function fdocs(res) {
+    // FIXME - res.text - тут же уже json!
+    log('FDOCS', (res.text == Object));
+    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
+}
+
+Relax.prototype.fdocs = function(res) {
+    if (!res.ok) return false;
+    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
+};
+
+/*
+ * CRUD methods for doc and docs array
+*/
+
 Relax.prototype.get = function(doc, cb) {
     if (isArray(doc)) {
         var url = this.opts.url + '/_all_docs';
@@ -85,21 +121,6 @@ Relax.prototype.get = function(doc, cb) {
     });
 }
 
-function allDocs(url, docs, cb) {
-    var keys = {keys: map(docs, function(doc) { return doc._id})};
-    postDoc(url, keys, function(res){
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
-}
-
-function postDoc(host, doc, cb) {
-    request
-        .post(host)
-        .send(doc)
-        .end(function(res) { cb(res) });
-}
-
 Relax.prototype.push = function(doc, cb) {
     if (isArray(doc)) {
         var docs = doc;
@@ -109,9 +130,7 @@ Relax.prototype.push = function(doc, cb) {
             var rows = res.rows;
             for (var i = 0; i < docs.length; i++) {
                 var rev = rows[i];
-                //log('REV', rev.value)
                 if (rev.value) docs[i]._rev = rows[i].value.rev;
-                docs[i].kuku = true;
             }
             if (!cb) return request.post(bulkdocs);
             bulkSave(bulkdocs, docs, cb);
@@ -130,25 +149,6 @@ Relax.prototype.push = function(doc, cb) {
         });
     })
 };
-
-function bulkSave(url, docs, cb) {
-    postDoc(url, {docs: docs}, function(res){
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
-}
-
-Relax.prototype.bulkSave_ = function(docs, cb) {
-    // TODO: если нет docs
-    // полный ли аналог update? Сделать тест
-    var path = this.opts.url + '/_bulk_docs';
-    docs = {docs: docs};
-    if (!cb) return request.post(path);
-    postDoc(path, docs, function(res){
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
-}
 
 Relax.prototype.del = function(doc, cb) {
     var host = this.opts.href;
@@ -208,24 +208,12 @@ Relax.prototype.update = function(method, doc, cb) {
     return (doc && docid) ? request.put(path + '/' + docid) : request.post(path);
 };
 
-function fdocs(res) {
-    // FIXME - res.text - тут же уже json!
-    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
-}
-
-Relax.prototype.fdocs = function(res) {
-    if (!res.ok) return false;
-    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
-};
-
-
 Relax.prototype.getall = function(doc, cb) {
     var path = this.opts.href + '/_all_docs';
     request
         .get(path)
         .query({include_docs: true})
         .end( function(res){
-            //log('DOC', res);
             (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
         });
 };
@@ -234,8 +222,6 @@ Relax.prototype.getall = function(doc, cb) {
  * Server-level methods
  //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
  */
-
-
 
 Relax.prototype.allDbs = function(cb) {
     var path = url.parse('http://localhost:5984/_all_dbs');
@@ -287,6 +273,18 @@ function merge(a, b) {
 function log () { console.log.apply(console, arguments) }
 
 /*
+
+  Relax.prototype.bulkSave_ = function(docs, cb) {
+  // TODO: если нет docs
+  // полный ли аналог update? Сделать тест
+  var path = this.opts.url + '/_bulk_docs';
+  docs = {docs: docs};
+  if (!cb) return request.post(path);
+  postDoc(path, docs, function(res){
+  var json = JSON.parse(res.text.trim());
+  (res.ok) ? cb(null, json) : cb(json, null);
+  });
+  }
 
   Relax.prototype.allDocs_ = function(docs, cb) {
   var path = this.opts.url + '/_all_docs';
