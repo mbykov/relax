@@ -162,31 +162,35 @@ describe('doc(s)-CRUD methods', function(){
                 })
         })
     })
+
+    describe('single doc - chainable', function(){
+        it('should not get doc if it does not exist', function(done){
+            relax
+                .get(doc)
+                .end(function(res){
+                    (res.ok == false).should.be.true;
+                    (res.ok) ? res.body.should.equal('some text') : JSON.parse(res.text).error.should.equal('not_found');
+                    done();
+                })
+        })
+        it('should push doc if it exists in DB or does not', function(done){
+            relax
+            .push(doc, function(err, res){
+                done();
+            })
+        })
+        it('should get existing doc', function(done){
+            relax
+                .get(doc)
+                .end(function(res){
+                    (res.ok == false).should.be.true;
+                    (res.ok) ? res.body.should.equal('some text') : JSON.parse(res.text).error.should.equal('not_found');
+                    done();
+                })
+        })
+
+    })
 })
 
 
 function log () { console.log.apply(console, arguments) }
-
-/*
-
-  it('should get all docs with _all_docs', function(done) {
-  relax.get(docs, function(err, res){
-  (err == null).should.be.true;
-  log(err, res)
-  done();
-  })
-  })
-
-
-it('should not get doc if it does not exist', function(done){
-    relax
-        .get(doc)
-        .set('cache', true)
-        .end(function(res){
-            res.text.trim().should.equal('{"error":"not_found","reason":"missing"}')
-            done();
-        });
-})
-
-
-*/
