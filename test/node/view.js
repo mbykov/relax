@@ -7,7 +7,7 @@ var utils = require('./utils');
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-return;
+//return;
 
 describe('VIEW method', function(){
     var doc = {_id: 'some-id', text: 'some text', count: 0};
@@ -74,6 +74,17 @@ describe('VIEW method', function(){
                     relax.fdocs(res)[0].text.should.equal('some text');
                     done();
                 });
+        })
+        describe('view callback', function(){
+            it('should get docs from view', function(done){
+                relax
+                    .view('spec/byText', function(err, res) {
+                        res.length.should.equal(2);
+                        res[0].text.should.equal('some other text'); // due to collation
+                        done();
+                    })
+            })
+            // view callback with key can not be done
         })
     })
 })

@@ -47,13 +47,6 @@ describe('doc(s)-CRUD methods', function(){
                 done();
             })
         })
-        // it('should get all docs with _all_docs', function(done) {
-        //     relax.get(docs, function(err, res){
-        //         (err == null).should.be.true;
-        //         log(err, res)
-        //         done();
-        //     })
-        // })
     })
 
     describe('single doc with callbacks', function(){
@@ -63,15 +56,6 @@ describe('doc(s)-CRUD methods', function(){
                 done();
             })
         })
-        // it('should not get doc if it does not exist', function(done){
-        //     relax
-        //         .get(doc)
-        //         .set('cache', true)
-        //         .end(function(res){
-        //             res.text.trim().should.equal('{"error":"not_found","reason":"missing"}')
-        //             done();
-        //         });
-        // })
         it('should not delete doc if it does not exist', function(done){
             relax
                 .del(doc, function(err, res){
@@ -109,3 +93,27 @@ describe('doc(s)-CRUD methods', function(){
 
 
 function log () { console.log.apply(console, arguments) }
+
+/*
+
+  it('should get all docs with _all_docs', function(done) {
+  relax.get(docs, function(err, res){
+  (err == null).should.be.true;
+  log(err, res)
+  done();
+  })
+  })
+
+
+it('should not get doc if it does not exist', function(done){
+    relax
+        .get(doc)
+        .set('cache', true)
+        .end(function(res){
+            res.text.trim().should.equal('{"error":"not_found","reason":"missing"}')
+            done();
+        });
+})
+
+
+*/

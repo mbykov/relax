@@ -168,16 +168,18 @@ Relax.prototype.del = function(doc, cb) {
 };
 
 Relax.prototype.view = function(method, cb) {
-    if (cb) return cb(false);
-    //var host = (this.opts.tmp || this.opts.url);
     var parts = method.split('/');
     if (this.opts.tmp) {
         var host = this.opts.tmp;
-        //var path = host + '/' + parts[0] + '/' + parts[1];
         var path = host + '/' + parts[1];
         this.opts.tmp = null;
     } else {
-        var path = host + '/_design/' + parts[0] + '/_view/' + parts[1];
+        var path = this.opts.url + '/_design/' + parts[0] + '/_view/' + parts[1];
+    }
+    if (cb) {
+        request.get(path).query({include_docs:true}).query({limit:5}).end(function(res) {
+            (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
+        })
     }
     return request.get(path).query({include_docs:true}).query({limit:5});
 };
@@ -191,9 +193,6 @@ Relax.prototype.show = function(method) {
 };
 
 Relax.prototype.list = function(method) {
-    // /relax-specs/_design/spec/_list/basicList/_design/spec/_view/basicView?include_docs=true&limit=5 404
-    // /relax-specs/_design/spec/_list/basicList/spec/basicView?include_docs=true&limit=5 500
-    // /relax-specs/_design/spec/_list/basicList/basicView?include_docs=true&limit=5
     var parts = method.split('/');
     var path = this.opts.url + '/_design/' + parts[0] + '/_list/' + parts[1];
     this.opts.tmp = path;
@@ -209,7 +208,7 @@ Relax.prototype.update = function(method, doc, cb) {
     return (doc && docid) ? request.put(path + '/' + docid) : request.post(path);
 };
 
-function docs(res) {
+function fdocs(res) {
     // FIXME - res.text - тут же уже json!
     return map(JSON.parse(res.text).rows, function(row) {return row.doc});
 }
@@ -227,7 +226,7 @@ Relax.prototype.getall = function(doc, cb) {
         .query({include_docs: true})
         .end( function(res){
             //log('DOC', res);
-            (res.ok) ? cb(null, docs(res)) : cb(res.text.trim(), null);
+            (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
         });
 };
 
