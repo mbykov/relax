@@ -272,6 +272,22 @@ Relax.prototype.uuids = function(count, cb) {
     request.get(path, function(res){cb(res.text)});
 };
 
+
+/*
+ * Authentication methods
+ */
+
+Relax.prototype.login = function(name, password, cb) {
+    var path = this.opts.server + '/_session';
+    request
+        .post(path)
+        .send({name: name, password: password})
+        .end(function(res) {
+            //log('====', res);
+            cb(res);
+        });
+};
+
 function merge(a, b) {
     var keys = Object.keys(b);
     keys.forEach(function(key) {
