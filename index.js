@@ -1,7 +1,13 @@
 var url = require('url');
 var isArray = require('isarray');
-var map = require('map-component'); // FIXME: try etc
+//var map = require('map-component');
 var request = require('superagent');
+
+try {
+    var map = require('map-component');
+} catch (err) {
+    var map = require('map');
+}
 
 module.exports = Relax;
 
@@ -283,10 +289,31 @@ Relax.prototype.login = function(name, password, cb) {
         .post(path)
         .send({name: name, password: password})
         .end(function(res) {
-            //log('====', res);
             cb(res);
         });
 };
+
+Relax.prototype.logout = function(cb) {
+    var path = this.opts.server + '/_session';
+    request
+        .del(path)
+        .end(function(res) {
+            cb(res);
+        });
+};
+
+Relax.prototype.session = function(cb) {
+    var path = this.opts.server + '/_session';
+    request
+        .get(path)
+        .end(function(res) {
+            cb(res);
+        });
+};
+
+/*
+ * private common functions
+ */
 
 function merge(a, b) {
     var keys = Object.keys(b);

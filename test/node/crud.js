@@ -2,7 +2,7 @@
 //var express = require('express');
 //var app = express();
 //var url = require('url');
-var map = require('map-component'); // FIXME: try etc
+var map = require('map-component');
 var Relax = require('../../');
 var utils = require('./utils');
 var relax = new Relax();

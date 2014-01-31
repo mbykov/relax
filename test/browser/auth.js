@@ -1,14 +1,5 @@
-//
-//var express = require('express');
-//var app = express();
-var url = require('url');
-//var Relax = require('../../');
 var Relax = require('relax');
-//var utils = require('./utils');
 var relax = new Relax();
-var admin = new Relax('http://admin:kjre4317@localhost:5984');
-
-// return;
 
 describe('AUTH', function(){
 
@@ -35,5 +26,3 @@ describe('AUTH', function(){
     })
 
 })
-
-function log () { console.log.apply(console, arguments) }

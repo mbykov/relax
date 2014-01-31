@@ -27,6 +27,11 @@ test:
 clean:
 	rm -fr build components template.js relax.js
 
+couch:
+	@component build
+	cd ~/web/Component/relax-couch; grunt
+
+
 # test:
 # 	@mocha-phantomjs test/index.html
 
