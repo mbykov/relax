@@ -20,6 +20,8 @@ function Relax(uri) {
     var defaults = url.parse('http://localhost:5984');
     uri = uri || '';
     var opts = url.parse(uri)
+    log(opts);
+
     this.opts = merge(defaults, opts);
     return this;
 }
@@ -52,6 +54,7 @@ Relax.prototype.create = function(name, cb) {
 
 Relax.prototype.drop = function(name, cb) {
     var path = this.opts.server+'/'+name;
+    log('======== ADMIN', path);
     request.del(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
@@ -112,6 +115,7 @@ Relax.prototype.fdocs = function(res) {
 Relax.prototype.get = function(doc, cb) {
     if (isArray(doc)) {
         var url = this.opts.url + '/_all_docs';
+        log('=============== URL', url);
         if (!cb) return request.post(url).send({docs: doc});
         allDocs(url, doc, cb);
         return;
@@ -131,6 +135,19 @@ Relax.prototype.push = function(doc, cb) {
         var docs = doc;
         var alldocs = this.opts.url + '/_all_docs';
         var bulkdocs = this.opts.url + '/_bulk_docs';
+        //if (!cb) return request.post(alldocs).send({docs: doc});
+        // if (!cb) {
+        //     return allDocs(alldocs, docs, function(err, res) {
+        //         var rows = res.rows;
+        //         for (var i = 0; i < docs.length; i++) {
+        //             var rev = rows[i];
+        //             if (rev.value) docs[i]._rev = rows[i].value.rev;
+        //             docs[i]._deleted = false;
+        //         }
+        //         return request.post(alldocs).send({docs: doc});
+        //     });
+        // }
+
         allDocs(alldocs, docs, function(err, res) {
             var rows = res.rows;
             for (var i = 0; i < docs.length; i++) {
@@ -321,7 +338,8 @@ function merge(a, b) {
         a[key] = b[key] || a[key];
     })
     //a.auth = b.auth;
-    a.dbname = a.pathname.replace(/^\//,'');
+    //a.dbname = a.pathname.replace(/^\//,''); // ========== попробовать с простым /dbname
+    a.dbname = a.pathname.split('/')[1];
     var auth = (a.auth) ? a.auth+'@' : '';
     a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname; // FIXME: убрать
     a.server = a.protocol+'//'+auth+a.host;

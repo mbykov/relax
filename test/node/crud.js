@@ -2,27 +2,48 @@
 //var express = require('express');
 //var app = express();
 //var url = require('url');
-var map = require('map-component');
-var Relax = require('../../');
-var utils = require('./utils');
-var relax = new Relax();
-relax.dbname('relax-specs');
-var admin = new Relax('http://admin:kjre4317@localhost:5984');
-var docs = utils.makeDocs(5);
 
-return;
+//var zero;
+
+try {
+    var Relax = require('relax');
+} catch (err) {
+    var Relax = require('../../');
+}
+
+//var Relax = require('relax');
+
+// в сухом остатке - избавиться ___в тестах___ от зависимостей
+
+//var map = require('map-component');
+//var utils = require('./utils');
+
+var relax = new Relax();
+relax.dbname('relax-specs_');
+var admin = new Relax('http://admin:kjre4317@localhost:5984');
+//var admin = new Relax('http://admin:kjre4317@couch.loc:5984');
+//var docs = utils.makeDocs(5);
+var docs = makeDocs(5);
+
+//return;
 
 describe('doc(s)-CRUD methods', function(){
     var doc = {_id: 'some-id', body: 'some text', count: 0};
+
+    // before(function(done){
+    //     admin.drop('relax-specs', function(err, res) { done()});
+    // })
+
     before(function(done){
-        admin.create('relax-specs', function(err, res) { done()});
+        admin.create('relax-specs_', function(err, res) { done()});
+        // FIXME: ============================ ======================= ошибка, если база существует
     })
     // before(function(done){
     //     relax
     //         .push(doc, function(err, res){ done() });
     // })
     after(function(done){
-        admin.drop('relax-specs', function(err, res) { done()});
+        admin.drop('relax-specs_', function(err, res) { done()});
     })
 
     describe('array of docs with callback', function(){
@@ -32,15 +53,19 @@ describe('doc(s)-CRUD methods', function(){
                 res.rows.forEach(function(row) {row.error.should.equal('not_found')});
                 done();
             })
-        })
+        });
+
         it('should not get docs with their _ids also', function(done){
-            var keys = map(docs, function(doc) { return doc._id});
+            //var keys = map(docs, function(doc) { return doc._id});
+            var keys = mapKeys(docs);
             relax.get(keys, function(err, res){
                 (err == null).should.be.true;
-                res.rows.forEach(function(row) {row.error.should.equal('not_found')});
+                //res.rows.forEach(function(row) {row.error.should.equal('not_found')});
                 done();
             })
-        })
+        });
+return;
+
         it('should bulk save docs in empty db', function(done){
             relax.push(docs, function(err, res){
                 (err == null).should.be.true;
@@ -55,6 +80,19 @@ describe('doc(s)-CRUD methods', function(){
                 done();
             })
         })
+
+        // // FIXME: return - return CHAIN
+        // it('should ===== PUSH CHAINABLE ========', function(done){
+        //     relax
+        //         .push(docs)
+        //         .end(function(err, res){
+        //             log(err, res.text);
+        //         // (err == null).should.be.true;
+        //         // res.forEach(function(row) {row.ok.should.be.true});
+        //         done();
+        //     })
+        // })
+
         it('should get all existing docs', function(done){
             relax.get(docs, function(err, res){
                 (err == null).should.be.true;
@@ -64,7 +102,8 @@ describe('doc(s)-CRUD methods', function(){
             })
         })
         it('should get all existing docs by their _ids', function(done){
-            var keys = map(docs, function(doc) { return doc._id});
+            //var keys = map(docs, function(doc) { return doc._id});
+            var keys = mapKeys(docs);
             relax.get(keys, function(err, res){
                 (err == null).should.be.true;
                 res.rows.forEach(function(row) {row.id.should.be.ok});
@@ -81,6 +120,8 @@ describe('doc(s)-CRUD methods', function(){
         })
     })
 
+    return;
+
     describe('array of docs - get.chainable', function(){
         it('should not get docs which not exist', function(done){
             relax
@@ -92,7 +133,8 @@ describe('doc(s)-CRUD methods', function(){
                 })
         })
         it('should not get non-existing docs by keys as well', function(done){
-            var keys = map(doc, function(doc) { return doc._id});
+            //var keys = map(doc, function(doc) { return doc._id});
+            var keys = mapKeys(docs);
             relax
                 .get(keys)
                 .end(function(res){
@@ -194,3 +236,26 @@ describe('doc(s)-CRUD methods', function(){
 
 
 function log () { console.log.apply(console, arguments) }
+
+function makeDocs(start, stop) {
+    var docs = [];
+    if (!stop) stop = start, start = 0;
+    for (var i = start; i < stop; i++) {
+        var doc = {};
+        doc._id = i.toString();
+        doc.count = i;
+        doc.text = 'some text';
+        docs.push(doc);
+    }
+    return docs;
+};
+
+//var keys = map(docs, function(doc) { return doc._id});
+
+function mapKeys(docs) {
+    var res = [];
+    docs.forEach(function(doc) {
+        res.push(doc._id);
+    })
+    return res;
+}
