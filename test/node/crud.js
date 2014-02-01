@@ -12,14 +12,11 @@ try {
 }
 
 //var Relax = require('relax');
-
-// в сухом остатке - избавиться ___в тестах___ от зависимостей
-
 //var map = require('map-component');
 //var utils = require('./utils');
 
 var relax = new Relax();
-relax.dbname('relax-specs_');
+relax.dbname('relax-specs');
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 //var admin = new Relax('http://admin:kjre4317@couch.loc:5984');
 //var docs = utils.makeDocs(5);
@@ -35,7 +32,7 @@ describe('doc(s)-CRUD methods', function(){
     // })
 
     before(function(done){
-        admin.create('relax-specs_', function(err, res) { done()});
+        admin.create('relax-specs', function(err, res) { done()});
         // FIXME: ============================ ======================= ошибка, если база существует
     })
     // before(function(done){
@@ -43,7 +40,7 @@ describe('doc(s)-CRUD methods', function(){
     //         .push(doc, function(err, res){ done() });
     // })
     after(function(done){
-        admin.drop('relax-specs_', function(err, res) { done()});
+        admin.drop('relax-specs', function(err, res) { done()});
     })
 
     describe('array of docs with callback', function(){
@@ -54,13 +51,11 @@ describe('doc(s)-CRUD methods', function(){
                 done();
             })
         });
-
         it('should not get docs with their _ids also', function(done){
-            //var keys = map(docs, function(doc) { return doc._id});
             var keys = mapKeys(docs);
             relax.get(keys, function(err, res){
                 (err == null).should.be.true;
-                //res.rows.forEach(function(row) {row.error.should.equal('not_found')});
+                res.rows.forEach(function(row) {row.error.should.equal('not_found')});
                 done();
             })
         });

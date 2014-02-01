@@ -20,8 +20,7 @@ function Relax(uri) {
     var defaults = url.parse('http://localhost:5984');
     uri = uri || '';
     var opts = url.parse(uri)
-    log(opts);
-
+    //log(opts);
     this.opts = merge(defaults, opts);
     return this;
 }
@@ -30,9 +29,10 @@ function Relax(uri) {
  * Setters
 */
 
-Relax.prototype.dbname = function(uri) {
-    var opts = url.parse(uri);
-    this.opts = merge(this.opts, opts);
+Relax.prototype.dbname = function(name) {
+    this.opts.dbname = name || '';
+    this.opts.url = this.opts.server+'/'+this.opts.dbname;
+    log('DBNAME', this.opts.url)
     return this;
 };
 
@@ -41,12 +41,13 @@ Relax.prototype.dbname = function(uri) {
 */
 
 Relax.prototype.exists = function(name, cb) {
-    var path = this.opts.href + name;
+    var path = this.opts.server+'/' + name;
     request.head(path, function(res){cb(res.ok)});
 };
 
 Relax.prototype.create = function(name, cb) {
-    var path = this.opts.href + name;
+    var path = this.opts.server+'/' + name;
+    log('CREATE', path);
     request.put(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
@@ -54,7 +55,7 @@ Relax.prototype.create = function(name, cb) {
 
 Relax.prototype.drop = function(name, cb) {
     var path = this.opts.server+'/'+name;
-    log('======== ADMIN', path);
+    log('DROP', path);
     request.del(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
@@ -115,7 +116,7 @@ Relax.prototype.fdocs = function(res) {
 Relax.prototype.get = function(doc, cb) {
     if (isArray(doc)) {
         var url = this.opts.url + '/_all_docs';
-        log('=============== URL', url);
+        log('\nGET', url)
         if (!cb) return request.post(url).send({docs: doc});
         allDocs(url, doc, cb);
         return;
@@ -338,8 +339,8 @@ function merge(a, b) {
         a[key] = b[key] || a[key];
     })
     //a.auth = b.auth;
-    //a.dbname = a.pathname.replace(/^\//,''); // ========== попробовать с простым /dbname
-    a.dbname = a.pathname.split('/')[1];
+    //a.dbname = a.pathname.replace(/^\//,''); // FIXME: ========== попробовать с простым /dbname
+    a.dbname = a.pathname.split('/')[0];
     var auth = (a.auth) ? a.auth+'@' : '';
     a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname; // FIXME: убрать
     a.server = a.protocol+'//'+auth+a.host;
