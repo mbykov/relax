@@ -1,10 +1,17 @@
 //
 //var express = require('express');
 //var app = express();
-var url = require('url');
-var Relax = require('../../');
-var utils = require('./utils');
+//var url = require('url');
+
+try {
+    var Relax = require('relax');
+} catch (err) {
+    var Relax = require('../../');
+}
+//var Relax = require('../../');
+
 var relax = new Relax();
+relax.dbname('relax-specs');
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
 return;
@@ -30,13 +37,13 @@ describe('VIEW method', function(){
             });
     })
     before(function(done){
-        relax.dbname('relax-specs')
+        relax
             .push(doc, function(err, res){
                 done();
             });
     })
     before(function(done){
-        relax.dbname('relax-specs')
+        relax
             .push(other, function(err, res){
                 done();
             });
@@ -79,7 +86,7 @@ describe('VIEW method', function(){
         })
     })
 
-    describe('view callback', function(){
+    describe('view with callback', function(){
         it('should get docs from view', function(done){
             relax
                 .view('spec/byText', function(err, res) {

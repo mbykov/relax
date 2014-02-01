@@ -22,7 +22,7 @@ var admin = new Relax('http://admin:kjre4317@localhost:5984');
 //var docs = utils.makeDocs(5);
 var docs = makeDocs(5);
 
-//return;
+return;
 
 describe('doc(s)-CRUD methods', function(){
     var doc = {_id: 'some-id', body: 'some text', count: 0};
@@ -169,13 +169,12 @@ describe('doc(s)-CRUD methods', function(){
         it('should push doc if it exists in DB or does not, single doc, callback', function(done){
             relax
                 .push(doc, function(err, res){
-                    log(err, res);
-                    // (err == null).should.be.true;
-                    // res.ok.should.be.ok;
+                    (err == null).should.be.true;
+                    res.ok.should.be.ok;
                     done();
                 })
         })
-return;
+
         it('should get doc if it exists', function(done){
             relax
                 .get(doc, function(err, res){
@@ -192,7 +191,7 @@ return;
                 })
         })
     })
-return;
+
     describe('single doc - get.chainable', function(){
         it('should not get doc if it does not exist', function(done){
             relax

@@ -1,9 +1,13 @@
 //
 //var express = require('express');
 //var app = express();
-var url = require('url');
-var Relax = require('../../');
-var utils = require('./utils');
+
+try {
+    var Relax = require('relax');
+} catch (err) {
+    var Relax = require('../../');
+}
+
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 

@@ -162,14 +162,14 @@ Relax.prototype.push = function(doc, cb) {
         });
         return;
     }
+    var dbpath = this.opts.dbpath;
     var path = this.opts.dbpath + '/' + doc._id;
     getDoc(path, function(res) {
         if (res.ok) {
             var dbdoc = JSON.parse(res.text);
             doc._rev = dbdoc._rev;
         }
-        postDoc(this.opts.dbpath, doc, function(res) {
-            log('PUSHURL', path);
+        postDoc(dbpath, doc, function(res) {
             var json = JSON.parse(res.text.trim());
             (res.ok) ? cb(null, json) : cb(json, null);
         });
@@ -193,13 +193,14 @@ Relax.prototype.del = function(doc, cb) {
         });
         return;
     }
+    var dbpath = this.opts.dbpath;
     var path = this.opts.dbpath + '/' + doc._id;
     getDoc(path, function(res) {
         if (res.ok) {
             var dbdoc = JSON.parse(res.text);
             doc._rev = dbdoc._rev;
             doc._deleted = true;
-            postDoc(this.opts.dbpath, doc, function(res) {
+            postDoc(dbpath, doc, function(res) {
                 var json = JSON.parse(res.text.trim());
                 (res.ok) ? cb(null, json) : cb(json, null);
             });
@@ -212,8 +213,7 @@ Relax.prototype.del = function(doc, cb) {
 Relax.prototype.view = function(method, cb) {
     var parts = method.split('/');
     if (this.opts.tmp) {
-        var url = this.opts.tmp;
-        var path = url + '/' + parts[1];
+        var path = this.opts.tmp + '/' + parts[1];
         this.opts.tmp = null;
     } else {
         var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];

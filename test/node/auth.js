@@ -3,14 +3,14 @@
 //var app = express();
 var url = require('url');
 
-// try {
-//     var Relax = require('../../');
-// } catch (err) {
-//     var Relax = require('relax');
-// }
+try {
+    var Relax = require('relax');
+} catch (err) {
+    var Relax = require('../../');
+}
 
 //var Relax = require('relax');
-var Relax = require('../../');
+//var Relax = require('../../');
 
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
@@ -18,13 +18,6 @@ var admin = new Relax('http://admin:kjre4317@localhost:5984');
 return;
 
 describe('AUTH', function(){
-
-    // 401 Unauthorized ===> WHY?
-    // after(function(done){
-    //     admin.drop('relax-specs', function(err, res){
-    //         done();
-    //     })
-    // });
 
     describe('cookie authentication', function(){
         it('should log-in existing user', function(done){
