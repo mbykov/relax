@@ -9,6 +9,7 @@ var admin = new Relax('http://admin:kjre4317@localhost:5984');
 return;
 
 describe('update method', function(){
+    this.slow(500);
     var doc = {_id: 'some-id', text: 'some text', count: 0};
     var other = {_id: 'other-id', text: 'some other text', count: 0};
     var hello = function(doc, req) {

@@ -21,6 +21,7 @@ test:
 	@NODE_ENV=test ./node_modules/.bin/mocha \
 		--require should \
 		--reporter $(REPORTER) \
+		--slow 500 \
 		--timeout 2000 \
 		$(TESTS)
 

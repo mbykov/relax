@@ -18,6 +18,7 @@ var admin = new Relax('http://admin:kjre4317@localhost:5984');
 return;
 
 describe('AUTH', function(){
+    this.slow(500);
 
     describe('cookie authentication', function(){
         it('should log-in existing user', function(done){

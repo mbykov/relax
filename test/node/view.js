@@ -17,6 +17,7 @@ var admin = new Relax('http://admin:kjre4317@localhost:5984');
 return;
 
 describe('VIEW method', function(){
+    this.slow(500);
     var doc = {_id: 'some-id', text: 'some text', count: 1};
     var other = {_id: 'other-id', text: 'some other text', count: 2};
     var byText = function(doc) { emit(doc.text, null) };
@@ -32,19 +33,19 @@ describe('VIEW method', function(){
     })
     before(function(done){
         admin.dbname('relax-specs')
-            .push(ddoc, function(err, res){
+            .post(ddoc, function(err, res){
                 done();
             });
     })
     before(function(done){
         relax
-            .push(doc, function(err, res){
+            .post(doc, function(err, res){
                 done();
             });
     })
     before(function(done){
         relax
-            .push(other, function(err, res){
+            .post(other, function(err, res){
                 done();
             });
     })

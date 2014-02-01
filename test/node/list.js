@@ -12,9 +12,10 @@ var relax = new Relax();
 relax.dbname('relax-specs');
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-return;
+//return;
 
 describe('LIST method', function(){
+    this.slow(500);
     var doc = {_id: 'some-id', text: 'some text', count: 0};
     var other = {_id: 'other-id', text: 'some other text', count: 0};
 
@@ -54,13 +55,13 @@ describe('LIST method', function(){
     })
     before(function(done){
         admin.dbname('relax-specs')
-            .push(ddoc, function(err, res){
+            .post(ddoc, function(err, res){
                 done();
             });
     })
     before(function(done){
         relax
-            .push(doc, function(err, res){
+            .post(doc, function(err, res){
                 done();
             });
     })
@@ -71,17 +72,34 @@ describe('LIST method', function(){
     })
 
     describe('list', function(){
+        it('should get doc if it exists', function(done){
+            relax
+                .get(doc, function(err, res){
+                    (err) ? err.error.should.equal('not_found') : res.text.should.equal('some text');
+                    done();
+                })
+        })
         it('should list existing doc', function(done){
             relax
                 .list('spec/basicList')
-                .view('spec/basicView')
-                .end(function(res){
-                    log(res.text);
-                    // res.ok.should.be.ok;
-                    // res.text.should.equal('some text');
+                .view('spec/basicView', function(err, res) {
+                    res.text.should.equal('some text');
                     done();
                 });
         })
+        // it('should list existing doc', function(done){
+        //     relax
+        //         .list('spec/basicList')
+        //         .view('spec/basicView')
+        //         .end(function(res){
+        //             log(res.text);
+        //             // res.ok.should.be.ok;
+        //             // res.text.should.equal('some text');
+        //             done();
+        //         });
+        // })
+
+
         // it('should respond on missing doc', function(done){
         //     relax
         //         .show('spec/justText')

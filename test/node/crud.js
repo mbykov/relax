@@ -23,10 +23,11 @@ var admin = new Relax('http://admin:kjre4317@localhost:5984');
 var docs = makeDocs(5);
 var docs1 = makeDocs(6, 11);
 
-//return;
+return;
 
 describe('doc(s)-CRUD methods', function(){
-    var doc = {_id: 'some-id', body: 'some text', count: 0};
+    this.slow(500);
+    var doc = {_id: 'some-id', text: 'some text', count: 0};
 
     before(function(done){
         admin.create('relax-specs', function(err, res) { done()});
@@ -149,7 +150,7 @@ describe('doc(s)-CRUD methods', function(){
     describe('single doc with callbacks', function(){
         it('should not get doc if it does not exist', function(done){
             relax.get(doc, function(err, res){
-                (err) ? err.error.should.equal('not_found') : res.body.should.equal('some text');
+                (err) ? err.error.should.equal('not_found') : res.text.should.equal('some text');
                 done();
             })
         })
@@ -173,7 +174,7 @@ describe('doc(s)-CRUD methods', function(){
         it('should get doc if it exists', function(done){
             relax
                 .get(doc, function(err, res){
-                    (err) ? err.error.should.equal('not_found') : res.body.should.equal('some text');
+                    (err) ? err.error.should.equal('not_found') : res.text.should.equal('some text');
                 done();
             })
         })
@@ -192,7 +193,7 @@ describe('doc(s)-CRUD methods', function(){
             relax
                 .get(doc)
                 .end(function(res){
-                    (res.ok) ? res.body.should.equal('some text') : JSON.parse(res.text).error.should.equal('not_found');
+                    (res.ok) ? res.text.should.equal('some text') : JSON.parse(res.text).error.should.equal('not_found');
                     done();
                 })
         })
@@ -206,7 +207,7 @@ describe('doc(s)-CRUD methods', function(){
             relax
                 .get(doc)
                 .end(function(res){
-                    (res.ok) ? res.body.should.equal('some text') : JSON.parse(res.text).error.should.equal('not_found');
+                    (res.ok) ? res.text.should.equal('some text') : JSON.parse(res.text).error.should.equal('not_found');
                     done();
                 })
         })

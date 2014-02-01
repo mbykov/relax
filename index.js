@@ -220,7 +220,7 @@ Relax.prototype.view = function(method, cb) {
     }
     if (cb) {
         request.get(path).query({include_docs:true}).query({limit:5}).end(function(res) {
-            (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
+            (res.ok) ? cb(null, res) : cb(res.text.trim(), null);
         })
     }
     return request.get(path).query({include_docs:true}).query({limit:5});
@@ -229,7 +229,6 @@ Relax.prototype.view = function(method, cb) {
 Relax.prototype.show = function(method) {
     var parts = method.split('/');
     var path = this.opts.dbpath + '/_design/' + parts[0] + '/_show/' + parts[1];
-    log('SHOW', path);
     this.opts.tmp = path;
     return this;
 };
