@@ -21,15 +21,15 @@ var admin = new Relax('http://admin:kjre4317@localhost:5984');
 //var admin = new Relax('http://admin:kjre4317@couch.loc:5984');
 //var docs = utils.makeDocs(5);
 var docs = makeDocs(5);
+var docs1 = makeDocs(6, 11);
 
-return;
+//return;
 
 describe('doc(s)-CRUD methods', function(){
     var doc = {_id: 'some-id', body: 'some text', count: 0};
 
     before(function(done){
         admin.create('relax-specs', function(err, res) { done()});
-        // FIXME: ============================ ======================= ошибка, если база существует
     })
     // before(function(done){
     //     relax
@@ -56,31 +56,26 @@ describe('doc(s)-CRUD methods', function(){
             })
         });
         it('should bulk save docs in empty db', function(done){
+            relax.post(docs, function(err, res){
+                (err == null).should.be.true;
+                res.forEach(function(row) {row.ok.should.be.true});
+                done();
+            })
+        })
+        it('should dirty push docs the same docs again', function(done){
             relax.push(docs, function(err, res){
                 (err == null).should.be.true;
                 res.forEach(function(row) {row.ok.should.be.true});
                 done();
             })
         })
-        it('should bulk save the same docs again', function(done){
-            relax.push(docs, function(err, res){
+        it('should not bulk save the same docs again', function(done){
+            relax.post(docs, function(err, res){
                 (err == null).should.be.true;
-                res.forEach(function(row) {row.ok.should.be.true});
+                res.forEach(function(row) {row.error.should.equal('conflict')});
                 done();
             })
         })
-
-        // // FIXME: return - return CHAIN
-        // it('should ===== PUSH CHAINABLE ========', function(done){
-        //     relax
-        //         .push(docs)
-        //         .end(function(err, res){
-        //             log(err, res.text);
-        //         // (err == null).should.be.true;
-        //         // res.forEach(function(row) {row.ok.should.be.true});
-        //         done();
-        //     })
-        // })
 
         it('should get all existing docs', function(done){
             relax.get(docs, function(err, res){
@@ -108,7 +103,7 @@ describe('doc(s)-CRUD methods', function(){
         })
     })
 
-    describe('array of docs - get.chainable', function(){
+    describe('array of docs - chainable', function(){
         it('should not get docs which not exist', function(done){
             relax
                 .get(docs)
@@ -130,9 +125,9 @@ describe('doc(s)-CRUD methods', function(){
         })
         it('should bulk save docs in empty db', function(done){
             relax
-                .push(docs, function(err, res){
-                    (err == null).should.be.true;
-                    res.forEach(function(row) {row.ok.should.be.true});
+                .post(docs1)
+                .end(function(res){
+                    JSON.parse(res.text).forEach(function(row) {row.ok.should.be.true});
                     done();
                 })
         })

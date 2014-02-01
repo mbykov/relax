@@ -63,6 +63,7 @@ describe('SHOW method', function(){
                     done();
                 });
         })
+return;
         it('should respond on missing doc', function(done){
             relax
                 .show('spec/justText')

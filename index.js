@@ -20,7 +20,6 @@ function Relax(uri) {
     var defaults = url.parse('http://localhost:5984');
     uri = uri || '';
     var opts = url.parse(uri)
-    //log(opts);
     this.opts = merge(defaults, opts);
     return this;
 }
@@ -46,7 +45,6 @@ Relax.prototype.exists = function(name, cb) {
 
 Relax.prototype.create = function(name, cb) {
     var path = this.opts.server+'/' + name;
-    log('CREATE', path);
     request.put(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
@@ -54,7 +52,6 @@ Relax.prototype.create = function(name, cb) {
 
 Relax.prototype.drop = function(name, cb) {
     var path = this.opts.server+'/'+name;
-    log('DROP', path);
     request.del(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
@@ -117,7 +114,6 @@ Relax.prototype.fdocs = function(res) {
 Relax.prototype.get = function(doc, cb) {
     if (isArray(doc)) {
         var path = this.opts.dbpath + '/_all_docs';
-        log('\nGET', path)
         if (!cb) return request.post(path).send({docs: doc});
         allDocs(path, doc, cb);
         return;
@@ -132,23 +128,26 @@ Relax.prototype.get = function(doc, cb) {
     });
 }
 
+Relax.prototype.post = function(doc, cb) {
+    if (isArray(doc)) {
+        var bulkdocs = this.opts.dbpath + '/_bulk_docs';
+        if (!cb) return request.post(bulkdocs).send({docs: doc});
+        bulkSave(bulkdocs, doc, cb);
+        return;
+    }
+    var dbpath = this.opts.dbpath;
+    if (!cb) return request.post(bulkdocs).send({docs: doc});
+    postDoc(dbpath, doc, function(res) {
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+};
+
 Relax.prototype.push = function(doc, cb) {
     if (isArray(doc)) {
         var docs = doc;
         var alldocs = this.opts.dbpath + '/_all_docs';
         var bulkdocs = this.opts.dbpath + '/_bulk_docs';
-        //if (!cb) return request.post(alldocs).send({docs: doc});
-        // if (!cb) {
-        //     return allDocs(alldocs, docs, function(err, res) {
-        //         var rows = res.rows;
-        //         for (var i = 0; i < docs.length; i++) {
-        //             var rev = rows[i];
-        //             if (rev.value) docs[i]._rev = rows[i].value.rev;
-        //             docs[i]._deleted = false;
-        //         }
-        //         return request.post(alldocs).send({docs: doc});
-        //     });
-        // }
 
         allDocs(alldocs, docs, function(err, res) {
             var rows = res.rows;
@@ -211,6 +210,7 @@ Relax.prototype.del = function(doc, cb) {
 };
 
 Relax.prototype.view = function(method, cb) {
+    if (!this.opts.dbname) return (cb) ? cb('no db name', null) : new Error('"no db name"');
     var parts = method.split('/');
     if (this.opts.tmp) {
         var path = this.opts.tmp + '/' + parts[1];
@@ -229,6 +229,7 @@ Relax.prototype.view = function(method, cb) {
 Relax.prototype.show = function(method) {
     var parts = method.split('/');
     var path = this.opts.dbpath + '/_design/' + parts[0] + '/_show/' + parts[1];
+    log('SHOW', path);
     this.opts.tmp = path;
     return this;
 };
@@ -343,7 +344,7 @@ function merge(a, b) {
     //a.dbname = a.pathname.replace(/^\//,''); // FIXME: ========== попробовать с простым /dbname
     a.dbname = a.pathname.split('/')[0];
     var auth = (a.auth) ? a.auth+'@' : '';
-    a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname; // FIXME: убрать
+    //a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname; // FIXME: убрать
     a.server = a.protocol+'//'+auth+a.host;
     a.dbpath = a.server+'/'+a.dbname;
     return a;
