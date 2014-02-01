@@ -128,6 +128,32 @@ Relax.prototype.get = function(doc, cb) {
     });
 }
 
+Relax.prototype.view = function(method, cb) {
+    if (!this.opts.dbname) return (cb) ? cb('no db name', null) : new Error('"no db name"');
+    var parts = method.split('/');
+    if (this.opts.tmp) {
+        var path = this.opts.tmp + '/' + parts[1];
+        this.opts.tmp = null;
+    } else {
+        var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
+    }
+    if (!cb) return request.get(path).query({include_docs:true}).query({limit:5});
+    // request
+    //     .get(path)
+    //     //.query({include_docs:true})
+    //     //.query({limit:5})
+    //     .end(function(res) {
+    //         log(res.text);
+    //         //(res.ok) ? cb(null, res) : cb(res.text.trim(), null);
+    //         log('P', path);
+    //         cb('kuku');
+    //         return;
+    //     });
+    request
+        .get(path)
+        .end(function(res) { cb(res) });
+};
+
 Relax.prototype.post = function(doc, cb) {
     if (isArray(doc)) {
         var bulkdocs = this.opts.dbpath + '/_bulk_docs';
@@ -207,23 +233,6 @@ Relax.prototype.del = function(doc, cb) {
             cb(null, JSON.parse(res.text))
         }
     });
-};
-
-Relax.prototype.view = function(method, cb) {
-    if (!this.opts.dbname) return (cb) ? cb('no db name', null) : new Error('"no db name"');
-    var parts = method.split('/');
-    if (this.opts.tmp) {
-        var path = this.opts.tmp + '/' + parts[1];
-        this.opts.tmp = null;
-    } else {
-        var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
-    }
-    if (cb) {
-        request.get(path).query({include_docs:true}).query({limit:5}).end(function(res) {
-            (res.ok) ? cb(null, res) : cb(res.text.trim(), null);
-        })
-    }
-    return request.get(path).query({include_docs:true}).query({limit:5});
 };
 
 Relax.prototype.show = function(method) {

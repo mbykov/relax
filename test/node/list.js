@@ -38,8 +38,9 @@ describe('LIST method', function(){
 
     var basicList = function(head, req) {
         var row;
+        log('START');
         while(row = getRow()) {
-            //log('ROW', row);
+            log('============ROW', row);
             send(row.key);
         };
         return;
@@ -65,11 +66,11 @@ describe('LIST method', function(){
                 done();
             });
     })
-    after(function(done){
-        admin.drop('relax-specs', function(err, res){
-            done();
-        })
-    })
+    // after(function(done){
+    //     admin.drop('relax-specs', function(err, res){
+    //         done();
+    //     })
+    // })
 
     describe('list', function(){
         it('should get doc if it exists', function(done){
@@ -78,48 +79,31 @@ describe('LIST method', function(){
                     (err) ? err.error.should.equal('not_found') : res.text.should.equal('some text');
                     done();
                 })
-        })
+        });
+        it('should get docs from view', function(done){
+            relax
+                .view('spec/basicView', function(err, res) {
+                    log('VIEW', err.text, res);
+                    // res.length.should.equal(2);
+                    // res[0].text.should.equal('some other text'); // due to collation
+                    done();
+                })
+        });
         it('should list existing doc', function(done){
             relax
                 .list('spec/basicList')
                 .view('spec/basicView', function(err, res) {
-                    res.text.should.equal('some text');
+                    //res.text.should.equal('some text');
                     done();
                 });
-        })
-        // it('should list existing doc', function(done){
-        //     relax
-        //         .list('spec/basicList')
-        //         .view('spec/basicView')
-        //         .end(function(res){
-        //             log(res.text);
-        //             // res.ok.should.be.ok;
-        //             // res.text.should.equal('some text');
-        //             done();
-        //         });
-        // })
-
-
-        // it('should respond on missing doc', function(done){
-        //     relax
-        //         .show('spec/justText')
-        //         .get('missingDoc')
-        //         .end(function(res){
-        //             res.status.should.equal(404);
-        //             res.text.should.equal('no such doc');
-        //             done();
-        //         });
-        // })
-        // it('should respond on missing func', function(done){
-        //     relax
-        //         .show('spec/justMissingText')
-        //         .get('missingDoc')
-        //         .end(function(res){
-        //             (res.ok == false).should.be.true;
-        //             JSON.parse(res.text).error.should.equal('not_found');
-        //             done();
-        //         });
-        // })
+        });
+        it('should get doc if it exists', function(done){
+            relax
+                .get(doc, function(err, res){
+                    (err) ? err.error.should.equal('not_found') : res.text.should.equal('some text');
+                    done();
+                })
+        });
     })
 })
 
