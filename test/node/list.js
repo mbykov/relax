@@ -37,13 +37,16 @@ describe('LIST method', function(){
     };
 
     var basicList = function(head, req) {
+        send("head");
         var row;
-        log('START');
+        log('=======START', head);
+        log('=======START', req);
         while(row = getRow()) {
-            log('============ROW', row);
+            log("=========row: "+toJSON(row));
             send(row.key);
         };
-        return;
+        return "tail";
+        //return;
     };
 
     //var ddoc = {_id: '_design/spec', views: {'byText': {map: byText.toString()} } };
@@ -66,11 +69,11 @@ describe('LIST method', function(){
                 done();
             });
     })
-    // after(function(done){
-    //     admin.drop('relax-specs', function(err, res){
-    //         done();
-    //     })
-    // })
+    after(function(done){
+        admin.drop('relax-specs', function(err, res){
+            done();
+        })
+    })
 
     describe('list', function(){
         it('should get doc if it exists', function(done){
@@ -83,7 +86,7 @@ describe('LIST method', function(){
         it('should get docs from view', function(done){
             relax
                 .view('spec/basicView', function(err, res) {
-                    log('VIEW', err.text, res);
+                    //log('VIEW', err.text, res);
                     // res.length.should.equal(2);
                     // res[0].text.should.equal('some other text'); // due to collation
                     done();
@@ -93,6 +96,7 @@ describe('LIST method', function(){
             relax
                 .list('spec/basicList')
                 .view('spec/basicView', function(err, res) {
+                    log('_______LIST RES', err, res.text);
                     //res.text.should.equal('some text');
                     done();
                 });

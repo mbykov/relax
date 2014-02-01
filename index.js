@@ -133,6 +133,7 @@ Relax.prototype.view = function(method, cb) {
     var parts = method.split('/');
     if (this.opts.tmp) {
         var path = this.opts.tmp + '/' + parts[1];
+        log('FROM VIEW', path);
         this.opts.tmp = null;
     } else {
         var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
@@ -149,9 +150,16 @@ Relax.prototype.view = function(method, cb) {
     //         cb('kuku');
     //         return;
     //     });
+    log('PATH', path);
     request
         .get(path)
-        .end(function(res) { cb(res) });
+        .query({include_docs:true})
+        .end(function(err, res) {
+            // log('ERR', err);
+            // log('RES-VIEW', JSON.parse(res.text).rows);
+            // cb(JSON.parse(res.text).rows);
+            cb(err, res);
+        });
 };
 
 Relax.prototype.post = function(doc, cb) {
