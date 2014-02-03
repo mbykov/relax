@@ -69,6 +69,7 @@ Relax.prototype.drop = function(name, cb) {
 function getDoc(path, cb) {
     request
         .get(path)
+        .set('Accept', 'application/json')
         .query({include_docs: true})
         .end(function(res) { cb(res) });
 }
@@ -123,8 +124,9 @@ Relax.prototype.get = function(doc, cb) {
     this.opts.tmp = null;
     if (!cb) return request.get(path);
     getDoc(path, function(res) {
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
+        cb(res);
+        // var json = JSON.parse(res.text.trim());
+        // (res.ok) ? cb(null, json) : cb(json, null);
     });
 }
 
@@ -133,7 +135,7 @@ Relax.prototype.view = function(method, cb) {
     var parts = method.split('/');
     if (this.opts.tmp) {
         var path = this.opts.tmp + '/' + parts[1];
-        log('FROM VIEW', path);
+        log('TMP'); // FIXME: другое view - match?
         this.opts.tmp = null;
     } else {
         var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
@@ -150,12 +152,12 @@ Relax.prototype.view = function(method, cb) {
     //         cb('kuku');
     //         return;
     //     });
-    log('PATH', path);
+    log('VIEW PATH', path);
     request
         .get(path)
-        .query({include_docs:true})
+        //.query({include_docs:true})
         .end(function(err, res) {
-            // log('ERR', err);
+            //log('ERR', err, res);
             // log('RES-VIEW', JSON.parse(res.text).rows);
             // cb(JSON.parse(res.text).rows);
             cb(err, res);

@@ -11,7 +11,7 @@ try {
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-return;
+//return;
 
 describe('SHOW method', function(){
     this.slow(500);
@@ -37,13 +37,13 @@ describe('SHOW method', function(){
     })
     before(function(done){
         admin.dbname('relax-specs')
-            .push(ddoc, function(err, res){
+            .post(ddoc, function(err, res){
                 done();
             });
     })
     before(function(done){
         relax.dbname('relax-specs')
-            .push(doc, function(err, res){
+            .post(doc, function(err, res){
                 done();
             });
     })
