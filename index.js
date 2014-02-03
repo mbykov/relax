@@ -136,12 +136,54 @@ Relax.prototype.get = function(doc, cb) {
     var id = docid(doc);
     var path = (this.opts.tmp || this.opts.dbpath) + '/' + id;
     this.opts.tmp = null;
-    if (!cb) return request.get(path);
-    getDoc(path, function(res) {
+    var req = request.get(path).query({include_docs: true});
+    if (!cb) return req;
+    req.end(function(err, res) {
+        log('GET', err, res.text);
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json.docs) : cb(json, null);
+    });
+}
+
+Relax.prototype.put = function(doc, cb) {
+    var path = this.opts.dbpath + '/' + docid(doc);
+    var req = request.put(path).send({docs: doc});
+    if (!cb) return req;
+    req.end(function(err, res) {
+        log('POST', err, res.text);
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(json, null);
     });
-}
+};
+
+Relax.prototype.post = function(doc, cb) {
+    var path = this.opts.dbpath + '/' + docid(doc);
+    var req = request.post(this.opts.dbpath).send({docs: doc});
+    if (!cb) return req;
+    req.end(function(err, res) {
+        log('POST', err, res.text);
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+};
+
+Relax.prototype.bulk = function(doc, cb) {
+    // нееее, а если в документе id нет???
+    if ('Array' === type(doc)) {
+        var bulkdocs = this.opts.dbpath + '/_bulk_docs';
+        if (!cb) return request.post(bulkdocs).send({docs: doc});
+        bulkSave(bulkdocs, doc, cb);
+        return;
+    }
+    var path = this.opts.dbpath + '/' + docid(doc);
+    var req = request.put(path).send({docs: doc});
+    if (!cb) return req;
+    req.end(function(err, res) {
+        log('POST', err, res.text);
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+};
 
 Relax.prototype.view = function(method, cb) {
     if (!this.opts.dbname) return (cb) ? cb('no db name', null) : new Error('"no db name"');
@@ -175,21 +217,6 @@ Relax.prototype.view = function(method, cb) {
             cb(JSON.parse(res.text).rows);
             //cb(err, res);
         });
-};
-
-Relax.prototype.post = function(doc, cb) {
-    if (isArray(doc)) {
-        var bulkdocs = this.opts.dbpath + '/_bulk_docs';
-        if (!cb) return request.post(bulkdocs).send({docs: doc});
-        bulkSave(bulkdocs, doc, cb);
-        return;
-    }
-    var dbpath = this.opts.dbpath;
-    if (!cb) return request.post(bulkdocs).send({docs: doc});
-    postDoc(dbpath, doc, function(res) {
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
 };
 
 Relax.prototype.push = function(doc, cb) {

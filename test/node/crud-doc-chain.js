@@ -17,7 +17,7 @@ var doc = {_id: 'some-id', text: 'some text', count: 1};
 var other = {_id: 'other-id', text: 'other text', count: 2};
 var uuid, rev;
 
-//return;
+return;
 
 describe('doc-CRUD-chain methods', function(){
     this.slow(500);
