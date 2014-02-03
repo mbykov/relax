@@ -52,6 +52,18 @@ Relax.prototype.create = function(name, cb) {
     });
 };
 
+Relax.prototype.purge = function(name, cb) {
+    var path = this.opts.server +'/' +name + '/_purge';
+    log('PATH', path);
+    request.post(path).type('application/json').end(function(res){cb(res.text)});
+};
+
+Relax.prototype.compact = function(name, cb) {
+    var path = this.opts.server +'/' +name + '/_compact';
+    log('PATH', path);
+    request.post(path).type('application/json').end(function(res){cb(res.text)});
+};
+
 Relax.prototype.drop = function(name, cb) {
     var path = this.opts.server+'/'+name;
     request.del(path, function(res){
@@ -217,12 +229,16 @@ Relax.prototype.del = function(doc, cb) {
         cb('not valid doc', null);
         return;
     }
-    doc._deleted = true;
-    if (!cb) return request.post(this.opts.dbpath).send(doc);
-    postDoc(this.opts.dbpath, doc, function(res) {
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
+    //doc._deleted = true;
+    if (!cb) return request.del(this.opts.dbpath).send(doc);
+    var path = this.opts.dbpath + '/' + docid(doc);
+    request
+        .del(path)
+        .query({rev: docrev(doc)})
+        .end(function(res) {
+            var json = JSON.parse(res.text.trim());
+            (res.ok) ? cb(null, json) : cb(json, null);
+        });
 }
 
 Relax.prototype.del_ = function(doc, cb) {
@@ -284,7 +300,7 @@ Relax.prototype.update = function(method, doc, cb) {
 };
 
 Relax.prototype.getall = function(doc, cb) {
-    var path = this.opts.href + '/_all_docs';
+    var path = this.opts.server + '/_all_docs';
     request
         .get(path)
         .query({include_docs: true})
@@ -325,10 +341,10 @@ Relax.prototype.activeTasks = function(cb) {
 };
 
 Relax.prototype.uuids = function(count, cb) {
-    if (typeof count === 'function') callback = count, count = null;
-    // FIXME: query - см cradle
-    var path = url.parse('http://localhost:5984/_uuids');
-    request.get(path, function(res){cb(res.text)});
+    // if (>>>typeof count === 'function') callback = count, count = null;
+    // // FIXME: query - см cradle
+    // var path = url.parse('http://localhost:5984/_uuids');
+    // request.get(path, function(res){cb(res.text)});
 };
 
 

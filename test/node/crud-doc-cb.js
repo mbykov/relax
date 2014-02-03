@@ -9,12 +9,13 @@ try {
 
 
 var relax = new Relax();
-relax.dbname('relax-specs');
+var name = 'relax-specs';
+relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 var docs = makeDocs(5);
 var docs1 = makeDocs(6, 11);
-var doc = {_id: 'some-id', text: 'some text', count: 1};
-var other = {_id: 'other-id', text: 'some other text', count: 2};
+var doc = {_id: 'crud-doc-cb-id', text: 'some text', count: 1};
+var other = {_id: 'other-doc-cb-id', text: 'some other text', count: 2};
 var rev;
 
 //return;
@@ -23,7 +24,7 @@ describe('doc-CRUD methods with callback', function(){
     this.slow(500);
 
     before(function(done){
-        admin.create('relax-specs', function(err, res) { done()});
+        admin.create(name, function(err, res) { done()});
     })
     before(function(done){
         relax
@@ -33,7 +34,7 @@ describe('doc-CRUD methods with callback', function(){
             });
     })
     after(function(done){
-        admin.drop('relax-specs', function(err, res) { done()});
+        admin.drop(name, function(err, res) { done()});
     })
 
     describe('single doc', function(){
@@ -64,7 +65,7 @@ describe('doc-CRUD methods with callback', function(){
         })
         it('should conflict with deleted doc', function(done){
             relax
-                .push(doc, function(err, res){
+                .post(doc, function(err, res){
                     (res == null).should.be.true;
                     err.error.should.equal('conflict');
                     done();
