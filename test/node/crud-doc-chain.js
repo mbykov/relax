@@ -8,32 +8,27 @@ try {
 }
 
 var relax = new Relax();
-var name = 'relax-specs-doc-chain_a';
+var name = 'relax-specs';
 relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
-var docs = makeDocs(5);
-var docs1 = makeDocs(6, 11);
-var doc = {_id: 'some-id', text: 'some text', count: 1};
-var other = {_id: 'other-id', text: 'other text', count: 2};
-var uuid, rev;
 
-return;
+//return;
 
 describe('doc-CRUD-chain methods', function(){
     this.slow(500);
+    var docs = makeDocs(5);
+    var docs1 = makeDocs(6, 11);
+    var doc = {_id: 'some-id', text: 'some text', count: 1};
+    var other = {_id: 'other-id', text: 'other text', count: 2};
+    var uuid, rev;
 
     before(function(done){
         admin.create(name, function(err, res) { done()});
     })
     before(function(done){
-        relax.uuids(function(uuids) {
-            doc._id = uuids[0];
-            done();
-        })
-    })
-    before(function(done){
         relax
             .post(doc, function(err, res){
+                uuid = res.id;
                 rev = res.rev;
                 done();
             });
@@ -44,11 +39,12 @@ describe('doc-CRUD-chain methods', function(){
 
     describe('single doc', function(){
         it('should get existing doc', function(done){
+            doc._id = uuid;
             relax
                 .get(doc)
                 .end(function(err, res){
                     (err == null).should.be.true;
-                    JSON.parse(res.text).text.should.equal('some text');
+                    JSON.parse(res.text).docs.text.should.equal('some text');
                     done();
                 })
         })

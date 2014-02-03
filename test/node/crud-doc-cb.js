@@ -7,7 +7,6 @@ try {
     var Relax = require('../../');
 }
 
-
 var relax = new Relax();
 var name = 'relax-specs';
 relax.dbname(name);
@@ -16,12 +15,12 @@ var admin = new Relax('http://admin:kjre4317@localhost:5984');
 //return;
 
 describe('doc-CRUD methods with callback', function(){
+    this.slow(500);
     var docs = makeDocs(5);
     var docs1 = makeDocs(6, 11);
     var doc = {_id: 'some-id', text: 'some text', count: 1};
     var other = {_id: 'other-id', text: 'some other text', count: 2};
     var uuid, rev;
-    this.slow(500);
 
     before(function(done){
         admin.create(name, function(err, res) { done()});
@@ -37,7 +36,6 @@ describe('doc-CRUD methods with callback', function(){
             .post(doc, function(err, res){
                 rev = res.rev;
                 uuid = res.id;
-                log('UUID', uuid);
                 done();
             });
     })
@@ -64,23 +62,23 @@ describe('doc-CRUD methods with callback', function(){
                 })
         })
 
-    //     it('should not delete doc w/o rev', function(done){
-    //         relax
-    //             .del(doc, function(err, res){
-    //                 (res == null).should.be.true;
-    //                 err.should.equal('not valid doc');
-    //                 done();
-    //             })
-    //     })
-    //     it('should delete doc', function(done){
-    //         doc._rev = rev;
-    //         relax
-    //             .del(doc, function(err, res){
-    //                 (err == null).should.be.true;
-    //                 res.ok.should.be.ok;
-    //                 done();
-    //             })
-    //     })
+        it('should not delete doc w/o rev', function(done){
+            relax
+                .del(doc, function(err, res){
+                    (res == null).should.be.true;
+                    err.should.equal('not valid doc');
+                    done();
+                })
+        })
+        it('should delete doc', function(done){
+            doc._rev = rev;
+            relax
+                .del(doc, function(err, res){
+                    (err == null).should.be.true;
+                    res.ok.should.be.ok;
+                    done();
+                })
+        })
     //     it('should conflict with deleted doc', function(done){
     //         relax
     //             .post(doc, function(err, res){

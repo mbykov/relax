@@ -139,7 +139,6 @@ Relax.prototype.get = function(doc, cb) {
     var req = request.get(path).query({include_docs: true});
     if (!cb) return req;
     req.end(function(err, res) {
-        log('GET', err, res.text);
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json.docs) : cb(json, null);
     });
@@ -150,18 +149,15 @@ Relax.prototype.put = function(doc, cb) {
     var req = request.put(path).send({docs: doc});
     if (!cb) return req;
     req.end(function(err, res) {
-        log('POST', err, res.text);
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(json, null);
     });
 };
 
 Relax.prototype.post = function(doc, cb) {
-    var path = this.opts.dbpath + '/' + docid(doc);
     var req = request.post(this.opts.dbpath).send({docs: doc});
     if (!cb) return req;
     req.end(function(err, res) {
-        log('POST', err, res.text);
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(json, null);
     });
