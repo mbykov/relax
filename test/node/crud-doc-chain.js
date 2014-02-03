@@ -12,7 +12,7 @@ var name = 'relax-specs';
 relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-//return;
+return;
 
 describe('doc-CRUD-chain methods', function(){
     this.slow(500);
@@ -42,6 +42,15 @@ describe('doc-CRUD-chain methods', function(){
             doc._id = uuid;
             relax
                 .get(doc)
+                .end(function(err, res){
+                    (err == null).should.be.true;
+                    JSON.parse(res.text).docs.text.should.equal('some text');
+                    done();
+                })
+        })
+        it('should get doc by id', function(done){
+            relax
+                .get(uuid)
                 .end(function(err, res){
                     (err == null).should.be.true;
                     JSON.parse(res.text).docs.text.should.equal('some text');

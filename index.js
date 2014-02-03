@@ -127,26 +127,26 @@ Relax.prototype.fdocs = function(res) {
 */
 
 Relax.prototype.get = function(doc, cb) {
-    if ('Array' === type(doc)) {
-        var path = this.opts.dbpath + '/_all_docs';
-        if (!cb) return request.post(path).send({docs: doc});
-        allDocs(path, doc, cb);
-        return;
-    }
+    // if ('Array' === type(doc)) {
+    //     var path = this.opts.dbpath + '/_all_docs';
+    //     if (!cb) return request.post(path).send({docs: doc});
+    //     allDocs(path, doc, cb);
+    //     return;
+    // }
     var id = docid(doc);
     var path = (this.opts.tmp || this.opts.dbpath) + '/' + id;
     this.opts.tmp = null;
-    var req = request.get(path).query({include_docs: true});
+    var req = request.get(path); //.query({include_docs: true});
     if (!cb) return req;
     req.end(function(err, res) {
         var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json.docs) : cb(json, null);
+        (res.ok) ? cb(null, json) : cb(json, null);
     });
 }
 
 Relax.prototype.put = function(doc, cb) {
     var path = this.opts.dbpath + '/' + docid(doc);
-    var req = request.put(path).send({docs: doc});
+    var req = request.put(path).send(doc);
     if (!cb) return req;
     req.end(function(err, res) {
         var json = JSON.parse(res.text.trim());
@@ -155,7 +155,7 @@ Relax.prototype.put = function(doc, cb) {
 };
 
 Relax.prototype.post = function(doc, cb) {
-    var req = request.post(this.opts.dbpath).send({docs: doc});
+    var req = request.post(this.opts.dbpath).send(doc);
     if (!cb) return req;
     req.end(function(err, res) {
         var json = JSON.parse(res.text.trim());

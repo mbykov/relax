@@ -18,30 +18,33 @@ describe('doc-CRUD methods with callback', function(){
     this.slow(500);
     var docs = makeDocs(5);
     var docs1 = makeDocs(6, 11);
-    var doc = {_id: 'some-id', text: 'some text', count: 1};
-    var other = {_id: 'other-id', text: 'some other text', count: 2};
+    // var doc = {_id: 'some-id', text: 'some text', count: 1};
+    // var other = {_id: 'other-id', text: 'some other text', count: 2};
+    var doc = {text: 'some text', count: 1};
+    var other = {text: 'other text', count: 2};
     var uuid, rev;
 
     before(function(done){
         admin.create(name, function(err, res) { done()});
     })
-    // before(function(done){
-    //     relax.uuids(function(uuids) {
-    //         doc._id = uuids[0];
-    //         done();
-    //     })
-    // })
+    before(function(done){
+        relax.uuids(function(uuids) {
+            uuid = uuids[0];
+            doc._id = uuid;
+            done();
+        })
+    })
     before(function(done){
         relax
-            .post(doc, function(err, res){
+            .put(doc, function(err, res){
                 rev = res.rev;
-                uuid = res.id;
+                //uuid = res.id;
                 done();
             });
     })
-    after(function(done){
-        admin.drop(name, function(err, res) { done()});
-    })
+    // after(function(done){
+    //     admin.drop(name, function(err, res) { done()});
+    // })
 
     describe('single doc', function(){
         it('should get existing doc', function(done){
@@ -87,32 +90,44 @@ describe('doc-CRUD methods with callback', function(){
     //                 done();
     //             })
     //     })
-    //     it('should post other doc', function(done){
-    //         relax
-    //             .post(other, function(err, res){
-    //                 rev = res.rev;
-    //                 (err == null).should.be.true;
-    //                 (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
-    //                 done();
-    //             })
-    //     })
-    //     it('should not post the same doc again', function(done){
-    //         relax
-    //             .post(other, function(err, res){
-    //                 (res == null).should.be.true;
-    //                 err.error.should.equal('conflict');
-    //                 done();
-    //             })
-    //     })
-    //     it('should post doc with rev', function(done){
-    //         other._rev = rev;
-    //         relax
-    //             .post(other, function(err, res){
-    //                 (err == null).should.be.true;
-    //                 (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
-    //                 done();
-    //             })
-    //     })
+        it('should post other doc', function(done){
+            relax
+                .post(other, function(err, res){
+                    rev = res.rev;
+                    uuid = res.id;
+                    (err == null).should.be.true;
+                    (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
+                    done();
+                })
+        })
+        // it('should not post the same doc again', function(done){
+        //     other._id = uuid;
+        //     relax
+        //         .put(other, function(err, res){
+        //             (res == null).should.be.true;
+        //             err.error.should.equal('conflict');
+        //             done();
+        //         })
+        // })
+        it('should get doc by id', function(done){
+            other._id = uuid;
+            relax
+                .get(other, function(err, res){
+                    (err == null).should.be.true;
+                    res.text.should.equal('other text');
+                    done();
+                })
+        })
+        it('should put doc with rev', function(done){
+            other._id = uuid;
+            other._rev = rev;
+            relax
+                .put(other, function(err, res){
+                    (err == null).should.be.true;
+                    (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
+                    done();
+                })
+        })
     //     it('should push the same doc w/o rev', function(done){
     //         relax
     //             .push(other, function(err, res){
