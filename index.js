@@ -9,6 +9,8 @@ try {
     var map = require('map');
 }
 
+var type = require('type');
+
 module.exports = Relax;
 
 /**
@@ -119,14 +121,13 @@ Relax.prototype.get = function(doc, cb) {
         allDocs(path, doc, cb);
         return;
     }
-    var docid = (doc.constructor == Object) ? doc._id : doc;
-    var path = (this.opts.tmp || this.opts.dbpath) + '/' + docid;
+    var id = docid(doc);
+    var path = (this.opts.tmp || this.opts.dbpath) + '/' + id;
     this.opts.tmp = null;
     if (!cb) return request.get(path);
     getDoc(path, function(res) {
-        cb(res);
-        // var json = JSON.parse(res.text.trim());
-        // (res.ok) ? cb(null, json) : cb(json, null);
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
     });
 }
 
@@ -212,6 +213,20 @@ Relax.prototype.push = function(doc, cb) {
 };
 
 Relax.prototype.del = function(doc, cb) {
+    if(!validate(doc)) {
+        cb('not valid doc', null);
+        return;
+    }
+    doc._deleted = true;
+    if (!cb) return request.post(this.opts.dbpath).send(doc);
+    postDoc(this.opts.dbpath, doc, function(res) {
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
+
+Relax.prototype.del_ = function(doc, cb) {
+    // FIXME: переделать на _rev
     if (isArray(doc)) {
         var docs = doc;
         var alldocs = this.opts.dbpath + '/_all_docs';
@@ -262,10 +277,10 @@ Relax.prototype.list = function(method) {
 Relax.prototype.update = function(method, doc, cb) {
     // FIXME: что?
     if (cb) return cb(false);
-    var docid = (doc && doc.constructor == Object) ? doc._id : doc;
+    var id = docid(doc);
     var parts = method.split('/');
     var path = this.opts.dbpath + '/_design/' + parts[0] + '/_update/' + parts[1];
-    return (doc && docid) ? request.put(path + '/' + docid) : request.post(path);
+    return (doc && id) ? request.put(path + '/' + id) : request.post(path);
 };
 
 Relax.prototype.getall = function(doc, cb) {
@@ -367,6 +382,38 @@ function merge(a, b) {
     a.dbpath = a.server+'/'+a.dbname;
     return a;
 };
+
+
+function docid(doc) {
+    var doctype = type(doc);
+    if (doctype === 'string' || doctype === 'number') return doc;
+    if (doctype === 'object') {
+        if (type(doc._id)) return doc._id;
+        if (type(doc.id)) return doc.id;
+    }
+    return null;
+}
+
+function docrev(doc) {
+    var doctype = type(doc);
+    if (doctype === 'string' || doctype === 'number') return doc;
+    if (doctype === 'object') {
+        if (type(doc._rev)) return doc._rev;
+        if (type(doc.rev)) return doc.rev;
+    }
+    return null;
+}
+
+function validate(doc) {
+    if (!docid(doc) || !docrev(doc) ) return false;
+    return true;
+}
+// if (!id || !rev) {
+//     if (fnCallback)
+//         fnCallback(new Error(notvalid), null);
+//     return self;
+// }
+
 
 function log () { console.log.apply(console, arguments) }
 

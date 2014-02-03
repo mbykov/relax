@@ -6,6 +6,7 @@
       "isarray": "*",
       "url": "*",
       "map-component": "*",
+      "type-component": "*",
       "superagent": "*"
   },
   "devDependencies": {

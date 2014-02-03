@@ -11,7 +11,7 @@ try {
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-//return;
+return;
 
 describe('SHOW method', function(){
     this.slow(500);

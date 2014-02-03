@@ -12,7 +12,7 @@ var relax = new Relax();
 relax.dbname('relax-specs');
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-//return;
+return;
 
 describe('LIST method', function(){
     this.slow(500);
