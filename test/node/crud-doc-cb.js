@@ -42,9 +42,9 @@ describe('doc-CRUD methods with callback', function(){
                 done();
             });
     })
-    // after(function(done){
-    //     admin.drop(name, function(err, res) { done()});
-    // })
+    after(function(done){
+        admin.drop(name, function(err, res) { done()});
+    })
 
     describe('single doc', function(){
         it('should get existing doc', function(done){
