@@ -127,7 +127,7 @@ Relax.prototype.fdocs = function(res) {
 */
 
 Relax.prototype.get = function(doc, cb) {
-    if (isArray(doc)) {
+    if ('Array' === type(doc)) {
         var path = this.opts.dbpath + '/_all_docs';
         if (!cb) return request.post(path).send({docs: doc});
         allDocs(path, doc, cb);
@@ -229,52 +229,14 @@ Relax.prototype.del = function(doc, cb) {
         cb('not valid doc', null);
         return;
     }
-    //doc._deleted = true;
-    if (!cb) return request.del(this.opts.dbpath).send(doc);
     var path = this.opts.dbpath + '/' + docid(doc);
-    request
-        .del(path)
-        .query({rev: docrev(doc)})
-        .end(function(res) {
-            var json = JSON.parse(res.text.trim());
-            (res.ok) ? cb(null, json) : cb(json, null);
-        });
-}
-
-Relax.prototype.del_ = function(doc, cb) {
-    // FIXME: переделать на _rev
-    if (isArray(doc)) {
-        var docs = doc;
-        var alldocs = this.opts.dbpath + '/_all_docs';
-        var bulkdocs = this.opts.dbpath + '/_bulk_docs';
-        allDocs(alldocs, docs, function(err, res) {
-            var rows = res.rows;
-            for (var i = 0; i < docs.length; i++) {
-                var rev = rows[i];
-                if (rev.value) docs[i]._rev = rows[i].value.rev;
-                docs[i]._deleted = true;
-            }
-            if (!cb) return request.post(bulkdocs);
-            bulkSave(bulkdocs, docs, cb);
-        });
-        return;
-    }
-    var dbpath = this.opts.dbpath;
-    var path = this.opts.dbpath + '/' + doc._id;
-    getDoc(path, function(res) {
-        if (res.ok) {
-            var dbdoc = JSON.parse(res.text);
-            doc._rev = dbdoc._rev;
-            doc._deleted = true;
-            postDoc(dbpath, doc, function(res) {
-                var json = JSON.parse(res.text.trim());
-                (res.ok) ? cb(null, json) : cb(json, null);
-            });
-        } else {
-            cb(null, JSON.parse(res.text))
-        }
+    var req = request.del(path).query({rev: docrev(doc)})
+    if (!cb) return req;
+    req.end(function(res) {
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
     });
-};
+}
 
 Relax.prototype.show = function(method) {
     var parts = method.split('/');
@@ -341,10 +303,14 @@ Relax.prototype.activeTasks = function(cb) {
 };
 
 Relax.prototype.uuids = function(count, cb) {
-    // if (>>>typeof count === 'function') callback = count, count = null;
-    // // FIXME: query - см cradle
-    // var path = url.parse('http://localhost:5984/_uuids');
-    // request.get(path, function(res){cb(res.text)});
+    if (type(count) === 'function') cb = count, count = 1;
+    var path = this.opts.server + '/_uuids';
+    request
+        .get(path)
+        .query({count:count})
+        .end(function(res){
+            cb(JSON.parse(res.text).uuids);
+        });
 };
 
 
