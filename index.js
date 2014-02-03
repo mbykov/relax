@@ -159,8 +159,8 @@ Relax.prototype.view = function(method, cb) {
         .end(function(err, res) {
             //log('ERR', err, res);
             // log('RES-VIEW', JSON.parse(res.text).rows);
-            // cb(JSON.parse(res.text).rows);
-            cb(err, res);
+            cb(JSON.parse(res.text).rows);
+            //cb(err, res);
         });
 };
 

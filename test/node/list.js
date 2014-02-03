@@ -20,7 +20,7 @@ describe('LIST method', function(){
     var other = {_id: 'other-id', text: 'some other text', count: 2};
 
     var basicView = function(doc) {
-        emit(doc.count, doc.count);
+        emit(doc.text, doc.count);
     };
     var withReduce = {
         map: function(doc) {
@@ -38,19 +38,26 @@ describe('LIST method', function(){
         start({"headers":{"Content-Type" : "text/html"}});
         send("head");
         var row;
-        log('=======START', toJSON(head));
-        log('=======START', toJSON(req));
         while(row = getRow()) {
             //log("=========row: "+toJSON(row));
-            //send(toJSON(row.key));
             send(row.key);
         };
         return "tail";
-        //return;
     };
 
-    //var ddoc = {_id: '_design/spec', views: {'byText': {map: byText.toString()} } };
-    var ddoc = {_id: '_design/spec', lists: {'basicList': basicList.toString() }, views: {'basicView': {map: basicView.toString()} } };
+    var listJSON = function(head, req) {
+        var row;
+        var res = [];
+        while(row = getRow()) {
+            var obj = {};
+            obj[row.key] = row.value;
+            //res.push(toJSON(obj));
+            res.push(obj);
+        };
+        return toJSON(res);
+    };
+
+    var ddoc = {_id: '_design/spec', lists: {'basicList': basicList.toString(), 'listJSON': listJSON.toString() }, views: {'basicView': {map: basicView.toString()} } };
 
     before(function(done){
         admin.create('relax-specs', function(err, res){
@@ -76,55 +83,39 @@ describe('LIST method', function(){
     })
 
     describe('list', function(){
-        it('should get doc if it exists', function(done){
-            relax
-                .get(doc, function(err, res){
-                    //(err) ? err.error.should.equal('not_found') : res.text.should.equal('some text');
-                    done();
-                })
-        });
-        it('should get docs from view', function(done){
-            relax
-                .view('spec/basicView', function(err, res) {
-                    //log('VIEW', err.text, res);
-                    // res.length.should.equal(2);
-                    // res[0].text.should.equal('some other text'); // due to collation
-                    done();
-                })
-        });
         it('should list existing doc MAIN', function(done){
             //var xhr = CouchDB.request("GET", "/test_suite_db/_design/lists/_list/basicBasic/basicView");
             // var xhr = CouchDB.request("GET", "/relax-specs/_design/spec/_list/basicList/basicView");
             // log('APACHE', xhr.status);
             relax
                 .get('_design/spec/_list/basicList/basicView')
-                .set('Accept', 'application/json')
                 .end(function(err, res) {
-                    log('_______LIST RES', err, res.text);
-                    //res.text.should.equal('some text');
+                    res.text.should.equal('headsome texttail');
                     done();
                 });
         });
-        // it('should list existing doc', function(done){
-        //     relax
-        //         .list('spec/basicList')
-        //         .view('spec/basicView', function(err, res) {
-        //             log('_______LIST RES', err, res.text);
-        //             //res.text.should.equal('some text');
-        //             done();
-        //         });
-        // });
-        it('should get doc if it exists', function(done){
+        it('should list existing doc - callback', function(done){
             relax
-                .get(doc, function(err, res){
-                    //(err) ? err.error.should.equal('not_found') : res.text.should.equal('some text');
+                .list('spec/basicList')
+                .view('spec/basicView', function(err, res) {
+                    res.text.should.equal('headsome texttail');
                     done();
                 });
         });
-        it('should get doc if it exists', function(done){
+        it('should return json doc - callback', function(done){
             relax
-                .get(doc, function(err, res){
-                    //(err) ? err.error.should.equal('not_found') : res.text.should.equal('some text');
+                .list('spec/listJSON')
+                .view('spec/basicView', function(err, res) {
+                    res.text.should.equal(JSON.stringify([{'some text': 1}]));
+                    done();
+                });
+        });
+        it('should return json doc - callback', function(done){
+            relax
+                .list('spec/listJSON')
+                .view('spec/basicView')
+                .end(function(err, res) {
+                    res.text.should.equal(JSON.stringify([{'some text': 1}]));
                     done();
                 });
         });
