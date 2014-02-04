@@ -156,7 +156,8 @@ Relax.prototype.post = function(doc, cb) {
 };
 
 Relax.prototype.bulk = function(doc, cb) {
-    if ('array' != type(doc)) return cb('docs isnt array');
+    var mess = 'docs isnt array';
+    if ('array' != type(doc)) return (cb) ? cb(mess) : new Error(mess);
     var bulkpath = this.opts.dbpath + '/_bulk_docs';
     var req = request.post(bulkpath).send({docs: doc});
     if (!cb) return req;
@@ -178,12 +179,10 @@ Relax.prototype.view = function(method, cb) {
     var req = request.get(path).query({limit:10}); // .query({include_docs:true})
     if (!cb) return req;
     log('VIEW PATH', path);
-    request
-        .get(path)
-        .end(function(err, res) {
-            var json = JSON.parse(res.text.trim());
-            (res.ok) ? cb(null, json) : cb(json, null);
-        });
+    req.end(function(err, res) {
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
 };
 
 Relax.prototype.push = function(doc, cb) {

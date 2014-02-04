@@ -69,16 +69,36 @@ describe('VIEW method', function(){
                 .end(function(err, res){
                     // log(err, JSON.parse(res.text).rows);
                     relax.frows(res).length.should.equal(5);
-                    relax.frows(res)[0].key.should.equal('some text 0'); // due to collation
+                    relax.frows(res)[0].key.should.equal('some text 0');
+                    done();
+                });
+        })
+        it('should view docs with include_docs', function(done){
+            relax
+                .view('spec/byText')
+                .query({include_docs: true})
+                .end(function(err, res){
+                    relax.fdocs(res).length.should.equal(5);
+                    relax.fdocs(res)[0].text.should.equal('some text 0');
                     done();
                 });
         })
         it('should get docs from view with key', function(done){
             relax
                 .view('spec/byText')
-                .query({key:'"some text 1"'})
+                .query({key:'"some text 4"'})
                 .end(function(err, res){
                     relax.frows(res).length.should.equal(1);
+                    relax.frows(res)[0].key.should.equal('some text 4');
+                    done();
+                });
+        })
+        it('should get docs from view with startkey-endkey', function(done){
+            relax
+                .view('spec/byText')
+                .query({startkey:'"some text 1"', endkey:'"some text 3"'})
+                .end(function(err, res){
+                    relax.frows(res).length.should.equal(3);
                     relax.frows(res)[0].key.should.equal('some text 1');
                     done();
                 });
