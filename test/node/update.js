@@ -47,7 +47,7 @@ describe('update method', function(){
     })
     before(function(done){
         admin.dbname(name)
-            .push(ddoc, function(err, res){
+            .post(ddoc, function(err, res){
                 done();
             });
     })
