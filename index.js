@@ -106,21 +106,13 @@ function postDoc(path, doc, cb) {
         });
 }
 
-function bulkSave(path, docs, cb) {
+function bulkSave_(path, docs, cb) {
     postDoc(path, {docs: docs}, function(res){
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(json, null);
     });
 }
 
-function fdocs(res) {
-    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
-}
-
-Relax.prototype.fdocs = function(res) {
-    if (!res.ok) return false;
-    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
-};
 
 /*
  * CRUD methods for doc or docs array
@@ -164,20 +156,12 @@ Relax.prototype.post = function(doc, cb) {
 };
 
 Relax.prototype.bulk = function(doc, cb) {
-    // нееее, а если в документе id нет???
-    if ('Array' === type(doc)) {
-        var bulkdocs = this.opts.dbpath + '/_bulk_docs';
-        if (!cb) return request.post(bulkdocs).send({docs: doc});
-        bulkSave(bulkdocs, doc, cb);
-        return;
-    }
-    var path = this.opts.dbpath + '/' + docid(doc);
-    var req = request.put(path).send({docs: doc});
+    if ('array' != type(doc)) return cb('docs isnt array');
+    var bulkpath = this.opts.dbpath + '/_bulk_docs';
+    var req = request.post(bulkpath).send({docs: doc});
     if (!cb) return req;
     req.end(function(err, res) {
-        log('POST', err, res.text);
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
+        (err) ? cb(null, res) : cb(err, null);
     });
 };
 
@@ -191,27 +175,14 @@ Relax.prototype.view = function(method, cb) {
     } else {
         var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
     }
-    if (!cb) return request.get(path).query({include_docs:true}).query({limit:5});
-    // request
-    //     .get(path)
-    //     //.query({include_docs:true})
-    //     //.query({limit:5})
-    //     .end(function(res) {
-    //         log(res.text);
-    //         //(res.ok) ? cb(null, res) : cb(res.text.trim(), null);
-    //         log('P', path);
-    //         cb('kuku');
-    //         return;
-    //     });
+    var req = request.get(path).query({limit:10}); // .query({include_docs:true})
+    if (!cb) return req;
     log('VIEW PATH', path);
     request
         .get(path)
-        //.query({include_docs:true})
         .end(function(err, res) {
-            //log('ERR', err, res);
-            // log('RES-VIEW', JSON.parse(res.text).rows);
-            cb(JSON.parse(res.text).rows);
-            //cb(err, res);
+            var json = JSON.parse(res.text.trim());
+            (res.ok) ? cb(null, json) : cb(json, null);
         });
 };
 
@@ -369,9 +340,23 @@ Relax.prototype.session = function(cb) {
         });
 };
 
+Relax.prototype.frows = function(res) {
+    if (!res.ok) return false;
+    return JSON.parse(res.text).rows;
+};
+
+Relax.prototype.fdocs = function(res) {
+    if (!res.ok) return false;
+    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
+};
+
 /*
  * private common functions
  */
+
+function fdocs(res) {
+    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
+}
 
 function merge(a, b) {
     var keys = Object.keys(b);
