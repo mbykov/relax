@@ -2,16 +2,24 @@
 //var express = require('express');
 //var app = express();
 var url = require('url');
-var Relax = require('../../');
+try {
+    var Relax = require('relax');
+} catch (err) {
+    var Relax = require('../../');
+}
 var relax = new Relax();
+var name = 'relax-specs';
+relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-return;
+//return;
 
 describe('update method', function(){
     this.slow(500);
-    var doc = {_id: 'some-id', text: 'some text', count: 0};
-    var other = {_id: 'other-id', text: 'some other text', count: 0};
+    var doc = {text: 'some text', count: 1};
+    var other = {text: 'other text', count: 2};
+    var uuid, rev;
+
     var hello = function(doc, req) {
         if (!doc) {
             if (req.id) {
@@ -33,60 +41,72 @@ describe('update method', function(){
     var ddoc = {_id: '_design/spec', updates: {'hello': hello.toString(), 'inPlace': inPlace.toString()} };
 
     before(function(done){
-        admin.create('relax-specs', function(err, res){
+        admin.create(name, function(err, res){
             done();
         })
     })
     before(function(done){
-        admin.dbname('relax-specs')
+        admin.dbname(name)
             .push(ddoc, function(err, res){
                 done();
             });
     })
     before(function(done){
-        relax.dbname('relax-specs')
-            .push(doc, function(err, res){
+        relax
+            .post(doc, function(err, res){
+                doc._id = res.id;
                 done();
             });
     })
     after(function(done){
-        admin.drop('relax-specs', function(err, res){
+        admin.drop(name, function(err, res){
             done();
         })
     })
 
+    // 1. тесты на POST, без id;
+    // 2. что-то все же ломает меня два параметра. ;
+    // 2.5. и отказаться от callback формы?
+    // 3. а если relax.update('spec/inPlace').post(doc).end(...)
+    // 4. а view? relax.view('spec/byText').post(doc)
+    // 5.
+
     describe('update chainable', function(){
         it('should update existing doc', function(done){
             relax
-                .update('spec/hello', doc)
-                .end(function(res){
+                .update('spec/hello')
+                .put(doc)
+                .end(function(err, res){
                     var world = JSON.parse(res.text).world;
                     res.headers['x-couch-id'].should.equal(doc._id);
                     world.should.equal('hello');
                     done();
                 });
         })
-        it('should format new doc', function(done){
+        it('should format empty doc', function(done){
             relax
                 .update('spec/hello')
-                .end(function(res){
+                .post(other)
+                .end(function(err, res){
                     res.text.should.equal('Empty World');
                     done();
                 });
         })
         it('should create doc with new _id', function(done){
             relax
-                .update('spec/hello/', {_id: 'nonExistingDoc'})
-                .end(function(res){
+                .update('spec/hello/')
+                .put({_id: 'nonExistingDoc'})
+                .end(function(err, res){
                     res.text.should.equal('New World');
                     done();
                 });
         })
         it('should update attr in-place', function(done){
             relax
-                .update('spec/inPlace/', doc)
+                .update('spec/inPlace/')
+                .put(doc._id)
                 .query({field:'world', value:'test'})
-                .end(function(res){
+                .end(function(err, res){
                     res.text.should.equal('set world to test')
                     done();
                 });

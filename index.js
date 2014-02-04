@@ -126,7 +126,9 @@ Relax.prototype.get = function(doc, cb) {
     //     return;
     // }
     var id = docid(doc);
-    var path = (this.opts.tmp || this.opts.dbpath) + '/' + id;
+    var mess = 'can not get - doc has no id';
+    if (!id) (cb) ? cb(mess, null) : new Error(mess);
+    var path = (this.opts.tmp || this.opts.dbpath) + '/' + docid(doc);
     this.opts.tmp = null;
     var req = request.get(path); //.query({include_docs: true});
     if (!cb) return req;
@@ -137,7 +139,11 @@ Relax.prototype.get = function(doc, cb) {
 }
 
 Relax.prototype.put = function(doc, cb) {
-    var path = this.opts.dbpath + '/' + docid(doc);
+    var id = docid(doc);
+    var mess = 'can not put - doc has no id';
+    if (!id) (cb) ? cb(mess, null) : new Error(mess);
+    var path = (this.opts.tmp || this.opts.dbpath) + '/' + id;
+    this.opts.tmp = null;
     var req = request.put(path).send(doc);
     if (!cb) return req;
     req.end(function(err, res) {
@@ -147,7 +153,9 @@ Relax.prototype.put = function(doc, cb) {
 };
 
 Relax.prototype.post = function(doc, cb) {
-    var req = request.post(this.opts.dbpath).send(doc);
+    var path = (this.opts.tmp || this.opts.dbpath);
+    this.opts.tmp = null;
+    var req = request.post(path).send(doc);
     if (!cb) return req;
     req.end(function(err, res) {
         var json = JSON.parse(res.text.trim());
@@ -167,11 +175,12 @@ Relax.prototype.bulk = function(doc, cb) {
 };
 
 Relax.prototype.view = function(method, cb) {
-    if (!this.opts.dbname) return (cb) ? cb('no db name', null) : new Error('"no db name"');
+    var mess = 'no db name';
+    if (!this.opts.dbname) return (cb) ? cb(mess, null) : new Error(mess);
     var parts = method.split('/');
     if (this.opts.tmp) {
         var path = this.opts.tmp + '/' + parts[1];
-        log('TMP'); // FIXME: другое view - match?
+        log('TMP'); // FIXME: другое view - match? ==== тестировать =====
         this.opts.tmp = null;
     } else {
         var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
@@ -179,8 +188,13 @@ Relax.prototype.view = function(method, cb) {
     var req = request.get(path).query({limit:10}); // .query({include_docs:true})
     if (!cb) return req;
     req.end(function(err, res) {
-        var json = JSON.parse(res.text.trim());
-        (err) ? cb(res.text.trim(), null) : cb(null, json);
+        var text = res.text.trim();
+        try {
+            var obj = JSON.parse(text);
+        } catch (err) {
+            var obj = text; // _list only case
+        }
+        (err) ? cb(text, null) : cb(null, obj);
     });
 };
 
@@ -244,7 +258,14 @@ Relax.prototype.list = function(method) {
     return this;
 };
 
-Relax.prototype.update = function(method, doc, cb) {
+Relax.prototype.update = function(method, cb) {
+    var parts = method.split('/');
+    var path = this.opts.dbpath + '/_design/' + parts[0] + '/_update/' + parts[1];
+    this.opts.tmp = path;
+    return this;
+};
+
+Relax.prototype.update_ = function(method, doc, cb) {
     // FIXME: что?
     if (cb) return cb(false);
     var id = docid(doc);
@@ -254,6 +275,7 @@ Relax.prototype.update = function(method, doc, cb) {
 };
 
 Relax.prototype.getall = function(doc, cb) {
+    // FIXME: all?
     var path = this.opts.server + '/_all_docs';
     request
         .get(path)

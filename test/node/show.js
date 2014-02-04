@@ -9,6 +9,8 @@ try {
 }
 
 var relax = new Relax();
+var name = 'relax-specs';
+relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
 return;
@@ -42,7 +44,7 @@ describe('SHOW method', function(){
             });
     })
     before(function(done){
-        relax.dbname('relax-specs')
+        relax
             .post(doc, function(err, res){
                 done();
             });
