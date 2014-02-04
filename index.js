@@ -231,10 +231,10 @@ Relax.prototype.push = function(doc, cb) {
 };
 
 Relax.prototype.del = function(doc, cb) {
-    if(!validate(doc)) {
-        cb('not valid doc', null);
-        return;
-    }
+    // if(!validate(doc)) {
+    //     cb('not valid doc', null);
+    //     return;
+    // }
     var path = this.opts.dbpath + '/' + docid(doc);
     var req = request.del(path).query({rev: docrev(doc)})
     if (!cb) return req;
@@ -290,24 +290,43 @@ Relax.prototype.getall = function(doc, cb) {
  //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
  */
 
+// FIXME - нужны проверки?
+// var mess = 'no server name';
+// if (!this.opts.server) (cb) ? cb(mess) : new Error(mess);
+
 Relax.prototype.allDbs = function(cb) {
-    var path = url.parse('http://localhost:5984/_all_dbs');
-    //request.get(path, cb);
-    request.get(path, function(res){cb(res.text)});
-};
-
-Relax.prototype.config = function(cb) {
-    var path = url.parse('http://localhost:5984/_config');
-    request.get(path, function(res){cb(res.text)});
-};
-
-Relax.prototype.info = function(cb) {
-    var path = url.parse('http://localhost:5984/');
-    request.get(path, function(res){cb(res.text)});
+    var path = [this.opts.server, '_all_dbs'].join('/');
+    var req = request.get(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, res) : cb(err, null);
+    });
 };
 
 Relax.prototype.stats = function(cb) {
-    var path = url.parse('http://localhost:5984/_stats');
+    var path = [this.opts.server, '_stats'].join('/');
+    var req = request.get(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+    });
+};
+
+Relax.prototype.config = function(section, key, cb) {
+    if (!cb) cb = key, key = null;
+    var path = [this.opts.server, '_config', section, key].join('/');
+    var req = request.get(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+    });
+};
+
+
+
+
+Relax.prototype.info = function(cb) {
+    var path = url.parse('http://localhost:5984/');
     request.get(path, function(res){cb(res.text)});
 };
 
