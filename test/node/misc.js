@@ -95,7 +95,7 @@ describe('MISC', function() {
                 })
         });
 
-        it('should get uuids with count', function(done){
+        it('should show info', function(done){
             relax.uuids(5, function(err, res){
                 (err == null).should.be.true;
                 res.length.should.equal(5);

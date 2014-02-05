@@ -1,6 +1,4 @@
 var url = require('url');
-var isArray = require('isarray');
-//var map = require('map-component');
 var request = require('superagent');
 
 try {
@@ -52,65 +50,12 @@ Relax.prototype.create = function(name, cb) {
     });
 };
 
-Relax.prototype.purge = function(name, cb) {
-    var path = this.opts.server +'/' +name + '/_purge';
-    request.post(path).type('application/json').end(function(res){cb(res.text)});
-};
-
-Relax.prototype.compact = function(name, cb) {
-    var path = this.opts.server +'/' +name + '/_compact';
-    request.post(path).type('application/json').end(function(res){cb(res.text)});
-};
-
 Relax.prototype.drop = function(name, cb) {
     var path = this.opts.server+'/'+name;
     request.del(path, function(res){
         (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
     });
 };
-
-/*
- * DB-level methods
-
- .query(id)
- .end(function(res){
-   (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
- });
- */
-
-// function getDoc(path, cb) {
-//     request
-//         .get(path)
-//         .set('Accept', 'application/json')
-//         .query({include_docs: true})
-//         .end(function(res) { cb(res) });
-// }
-
-// function allDocs(path, docs, cb) {
-//     var keys = {keys: map(docs, function(doc) { return (doc.constructor == Object) ? doc._id : doc})};
-//     postDoc(path, keys, function(res){
-//         var json = JSON.parse(res.text.trim());
-//         (res.ok) ? cb(null, json) : cb(json, null);
-//     });
-// }
-
-// function postDoc(path, doc, cb) {
-//     request
-//         .post(path)
-//         .query({include_docs: true})
-//         .send(doc)
-//         .end(function(res) {
-//             cb(res)
-//         });
-// }
-
-// function bulkSave_(path, docs, cb) {
-//     postDoc(path, {docs: docs}, function(res){
-//         var json = JSON.parse(res.text.trim());
-//         (res.ok) ? cb(null, json) : cb(json, null);
-//     });
-// }
-
 
 /*
  * CRUD methods for doc or docs array
@@ -172,6 +117,47 @@ Relax.prototype.bulk = function(doc, cb) {
     });
 };
 
+Relax.prototype.del = function(doc, cb) {
+    var path = this.opts.dbpath + '/' + docid(doc);
+    var req = request.del(path).query({rev: docrev(doc)})
+    if (!cb) return req;
+    req.end(function(res) {
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(json, null);
+    });
+}
+
+Relax.prototype.getall = function(doc, cb) {
+    // FIXME: all?
+    var path = this.opts.server + '/_all_docs';
+    request
+        .get(path)
+        .query({include_docs: true})
+        .end( function(res){
+            (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
+        });
+};
+
+Relax.prototype.push = function(doc, cb) {
+    var dbpath = this.opts.dbpath;
+    var path = this.opts.dbpath + '/' + doc._id;
+    getDoc(path, function(res) {
+        if (res.ok) {
+            var dbdoc = JSON.parse(res.text);
+            doc._rev = dbdoc._rev;
+        }
+        postDoc(dbpath, doc, function(res) {
+            var json = JSON.parse(res.text.trim());
+            (res.ok) ? cb(null, json) : cb(json, null);
+        });
+    })
+};
+
+/*
+ * design document handlers
+ *
+ */
+
 Relax.prototype.view = function(method, cb) {
     var mess = 'no db name';
     if (!this.opts.dbname) return (cb) ? cb(mess, null) : new Error(mess);
@@ -196,52 +182,6 @@ Relax.prototype.view = function(method, cb) {
     });
 };
 
-Relax.prototype.push = function(doc, cb) {
-    if (isArray(doc)) {
-        var docs = doc;
-        var alldocs = this.opts.dbpath + '/_all_docs';
-        var bulkdocs = this.opts.dbpath + '/_bulk_docs';
-
-        allDocs(alldocs, docs, function(err, res) {
-            var rows = res.rows;
-            for (var i = 0; i < docs.length; i++) {
-                var rev = rows[i];
-                if (rev.value) docs[i]._rev = rows[i].value.rev;
-                docs[i]._deleted = false;
-            }
-            //if (!cb) return request.post(alldocs).send({docs: doc}); // alas (((:
-            bulkSave(bulkdocs, docs, cb);
-        });
-        return;
-    }
-    var dbpath = this.opts.dbpath;
-    var path = this.opts.dbpath + '/' + doc._id;
-    getDoc(path, function(res) {
-        if (res.ok) {
-            var dbdoc = JSON.parse(res.text);
-            doc._rev = dbdoc._rev;
-        }
-        postDoc(dbpath, doc, function(res) {
-            var json = JSON.parse(res.text.trim());
-            (res.ok) ? cb(null, json) : cb(json, null);
-        });
-    })
-};
-
-Relax.prototype.del = function(doc, cb) {
-    // if(!validate(doc)) {
-    //     cb('not valid doc', null);
-    //     return;
-    // }
-    var path = this.opts.dbpath + '/' + docid(doc);
-    var req = request.del(path).query({rev: docrev(doc)})
-    if (!cb) return req;
-    req.end(function(res) {
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
-}
-
 Relax.prototype.show = function(method) {
     var parts = method.split('/');
     var path = this.opts.dbpath + '/_design/' + parts[0] + '/_show/' + parts[1];
@@ -263,67 +203,10 @@ Relax.prototype.update = function(method, cb) {
     return this;
 };
 
-Relax.prototype.update_ = function(method, doc, cb) {
-    // FIXME: что?
-    if (cb) return cb(false);
-    var id = docid(doc);
-    var parts = method.split('/');
-    var path = this.opts.dbpath + '/_design/' + parts[0] + '/_update/' + parts[1];
-    return (doc && id) ? request.put(path + '/' + id) : request.post(path);
-};
-
-Relax.prototype.getall = function(doc, cb) {
-    // FIXME: all?
-    var path = this.opts.server + '/_all_docs';
-    request
-        .get(path)
-        .query({include_docs: true})
-        .end( function(res){
-            (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
-        });
-};
-
 /*
  * Server-level methods
  //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
  */
-
-Relax.prototype.allDbs = function(cb) {
-    var path = [this.opts.server, '_all_dbs'].join('/');
-    var req = request.get(path);
-    if (!cb) return req;
-    req.end(function(err, res) {
-        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
-    });
-};
-
-Relax.prototype.activeTasks = function(cb) {
-    var path = [this.opts.server, '_active_tasks'].join('/');
-    var req = request.get(path);
-    if (!cb) return req;
-    req.end(function(err, res) {
-        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
-    });
-};
-
-Relax.prototype.stats = function(cb) {
-    var path = [this.opts.server, '_stats'].join('/');
-    var req = request.get(path);
-    if (!cb) return req;
-    req.end(function(err, res) {
-        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
-    });
-};
-
-Relax.prototype.config = function(section, key, cb) {
-    if (!cb) cb = key, key = null;
-    var path = [this.opts.server, '_config', section, key].join('/');
-    var req = request.get(path);
-    if (!cb) return req;
-    req.end(function(err, res) {
-        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
-    });
-};
 
 Relax.prototype.uuids = function(count, cb) {
     if (type(count) === 'function') cb = count, count = 1;
@@ -333,11 +216,6 @@ Relax.prototype.uuids = function(count, cb) {
     req.end(function(err, res){
         (res.ok) ? cb(null, JSON.parse(res.text).uuids) : cb(err, null);
     });
-};
-
-Relax.prototype.info = function(cb) {
-    var path = url.parse('http://localhost:5984/');
-    request.get(path, function(res){cb(res.text)});
 };
 
 
@@ -373,6 +251,20 @@ Relax.prototype.session = function(cb) {
         });
 };
 
+Relax.prototype.signup = function(cb) {
+    // FIXME:
+    // var path = this.opts.server + '/_session';
+    // request
+    //     .get(path)
+    //     .end(function(res) {
+    //         cb(res);
+    //     });
+};
+
+/*
+ * helpers
+ */
+
 Relax.prototype.frows = function(res) {
     if (!res.ok) return false;
     return JSON.parse(res.text).rows;
@@ -396,11 +288,8 @@ function merge(a, b) {
     keys.forEach(function(key) {
         a[key] = b[key] || a[key];
     })
-    //a.auth = b.auth;
-    //a.dbname = a.pathname.replace(/^\//,''); // FIXME: ========== попробовать с простым /dbname
     a.dbname = a.pathname.split('/')[0];
     var auth = (a.auth) ? a.auth+'@' : '';
-    //a.href = a.protocol+'//'+auth+a.host+'/'+a.dbname; // FIXME: убрать
     a.server = a.protocol+'//'+auth+a.host;
     a.dbpath = a.server+'/'+a.dbname;
     return a;
@@ -431,14 +320,52 @@ function validate(doc) {
     if (!docid(doc) || !docrev(doc) ) return false;
     return true;
 }
-// if (!id || !rev) {
-//     if (fnCallback)
-//         fnCallback(new Error(notvalid), null);
-//     return self;
-// }
 
 
 function log () { console.log.apply(console, arguments) }
 
 /*
+
 */
+
+/*
+ * DB-level methods
+
+ .query(id)
+ .end(function(res){
+   (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+ });
+ */
+
+// function getDoc(path, cb) {
+//     request
+//         .get(path)
+//         .set('Accept', 'application/json')
+//         .query({include_docs: true})
+//         .end(function(res) { cb(res) });
+// }
+
+// function allDocs(path, docs, cb) {
+//     var keys = {keys: map(docs, function(doc) { return (doc.constructor == Object) ? doc._id : doc})};
+//     postDoc(path, keys, function(res){
+//         var json = JSON.parse(res.text.trim());
+//         (res.ok) ? cb(null, json) : cb(json, null);
+//     });
+// }
+
+// function postDoc(path, doc, cb) {
+//     request
+//         .post(path)
+//         .query({include_docs: true})
+//         .send(doc)
+//         .end(function(res) {
+//             cb(res)
+//         });
+// }
+
+// function bulkSave_(path, docs, cb) {
+//     postDoc(path, {docs: docs}, function(res){
+//         var json = JSON.parse(res.text.trim());
+//         (res.ok) ? cb(null, json) : cb(json, null);
+//     });
+// }

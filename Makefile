@@ -7,15 +7,15 @@ TESTS = test/node/*.js
 REPORTER = spec
 
 build: components index.js #test
-	@component build --dev
+	@component build #--dev
 
 components: component.json
 	@component install --dev
 
 relax: components index.js test/node/*.js
-	@component build \
+	@component build  --use component-minify\
 		--standalone relax \
-		--out . --name relax
+		--out . --name relax.min
 
 test:
 	@NODE_ENV=test ./node_modules/.bin/mocha \
@@ -25,18 +25,22 @@ test:
 		--timeout 2000 \
 		$(TESTS)
 
-clean:
-	rm -fr build components template.js relax.js
-
 couch:
 	@component build
 	cd ~/web/Component/relax-couch; grunt
 
+min: components index.js #test
+	@component build --use component-minify
+	cd ~/web/Component/relax-couch; grunt
+
+
+clean:
+	rm -fr build components template.js relax.js
 
 # test:
 # 	@mocha-phantomjs test/index.html
 
 
-.PHONY: test
+.PHONY: test clean
 
 #		--growl \
