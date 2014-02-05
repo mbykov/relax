@@ -54,13 +54,11 @@ Relax.prototype.create = function(name, cb) {
 
 Relax.prototype.purge = function(name, cb) {
     var path = this.opts.server +'/' +name + '/_purge';
-    log('PATH', path);
     request.post(path).type('application/json').end(function(res){cb(res.text)});
 };
 
 Relax.prototype.compact = function(name, cb) {
     var path = this.opts.server +'/' +name + '/_compact';
-    log('PATH', path);
     request.post(path).type('application/json').end(function(res){cb(res.text)});
 };
 
@@ -80,38 +78,38 @@ Relax.prototype.drop = function(name, cb) {
  });
  */
 
-function getDoc(path, cb) {
-    request
-        .get(path)
-        .set('Accept', 'application/json')
-        .query({include_docs: true})
-        .end(function(res) { cb(res) });
-}
+// function getDoc(path, cb) {
+//     request
+//         .get(path)
+//         .set('Accept', 'application/json')
+//         .query({include_docs: true})
+//         .end(function(res) { cb(res) });
+// }
 
-function allDocs(path, docs, cb) {
-    var keys = {keys: map(docs, function(doc) { return (doc.constructor == Object) ? doc._id : doc})};
-    postDoc(path, keys, function(res){
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
-}
+// function allDocs(path, docs, cb) {
+//     var keys = {keys: map(docs, function(doc) { return (doc.constructor == Object) ? doc._id : doc})};
+//     postDoc(path, keys, function(res){
+//         var json = JSON.parse(res.text.trim());
+//         (res.ok) ? cb(null, json) : cb(json, null);
+//     });
+// }
 
-function postDoc(path, doc, cb) {
-    request
-        .post(path)
-        .query({include_docs: true})
-        .send(doc)
-        .end(function(res) {
-            cb(res)
-        });
-}
+// function postDoc(path, doc, cb) {
+//     request
+//         .post(path)
+//         .query({include_docs: true})
+//         .send(doc)
+//         .end(function(res) {
+//             cb(res)
+//         });
+// }
 
-function bulkSave_(path, docs, cb) {
-    postDoc(path, {docs: docs}, function(res){
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
-}
+// function bulkSave_(path, docs, cb) {
+//     postDoc(path, {docs: docs}, function(res){
+//         var json = JSON.parse(res.text.trim());
+//         (res.ok) ? cb(null, json) : cb(json, null);
+//     });
+// }
 
 
 /*
@@ -290,16 +288,21 @@ Relax.prototype.getall = function(doc, cb) {
  //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
  */
 
-// FIXME - нужны проверки?
-// var mess = 'no server name';
-// if (!this.opts.server) (cb) ? cb(mess) : new Error(mess);
-
 Relax.prototype.allDbs = function(cb) {
     var path = [this.opts.server, '_all_dbs'].join('/');
     var req = request.get(path);
     if (!cb) return req;
     req.end(function(err, res) {
-        (res.ok) ? cb(null, res) : cb(err, null);
+        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+    });
+};
+
+Relax.prototype.activeTasks = function(cb) {
+    var path = [this.opts.server, '_active_tasks'].join('/');
+    var req = request.get(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
     });
 };
 
@@ -322,28 +325,19 @@ Relax.prototype.config = function(section, key, cb) {
     });
 };
 
-
-
+Relax.prototype.uuids = function(count, cb) {
+    if (type(count) === 'function') cb = count, count = 1;
+    var path = this.opts.server + '/_uuids';
+    var req = request.get(path).query({count:count})
+    if (!cb) return req;
+    req.end(function(err, res){
+        (res.ok) ? cb(null, JSON.parse(res.text).uuids) : cb(err, null);
+    });
+};
 
 Relax.prototype.info = function(cb) {
     var path = url.parse('http://localhost:5984/');
     request.get(path, function(res){cb(res.text)});
-};
-
-Relax.prototype.activeTasks = function(cb) {
-    var path = url.parse('http://localhost:5984/_active_tasks');
-    request.get(path, function(res){cb(res.text)});
-};
-
-Relax.prototype.uuids = function(count, cb) {
-    if (type(count) === 'function') cb = count, count = 1;
-    var path = this.opts.server + '/_uuids';
-    request
-        .get(path)
-        .query({count:count})
-        .end(function(res){
-            cb(JSON.parse(res.text).uuids);
-        });
 };
 
 
