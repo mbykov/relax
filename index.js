@@ -239,7 +239,7 @@ Relax.prototype.update = function(method, cb) {
 
 /*
  * Server-level methods
- //if (!this.opts.dbname)  throw new Error('Origin is not allowed by Access-Control-Allow-Origin');
+ *
  */
 
 Relax.prototype.uuids = function(count, cb) {

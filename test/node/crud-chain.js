@@ -12,7 +12,7 @@ var name = 'relax-specs';
 relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-return;
+//return;
 
 describe('CRUD-chain methods', function(){
     this.slow(500);
