@@ -88,15 +88,10 @@ Relax.prototype.info = function(cb) {
 */
 
 Relax.prototype.get = function(doc, cb) {
-    // if ('Array' === type(doc)) {
-    //     var path = this.opts.dbpath + '/_all_docs';
-    //     if (!cb) return request.post(path).send({docs: doc});
-    //     allDocs(path, doc, cb);
-    //     return;
-    // }
     var id = docid(doc);
     var mess = 'can not get - doc has no id';
     if (!id) (cb) ? cb(mess, null) : new Error(mess);
+
     var path = (this.opts.tmp || this.opts.dbpath) + '/' + docid(doc);
     this.opts.tmp = null;
     var req = request.get(path); //.query({include_docs: true});
@@ -115,10 +110,10 @@ Relax.prototype.put = function(doc, cb) {
     this.opts.tmp = null;
     var req = request.put(path).send(doc);
     if (!cb) return req;
-    req.end(function(err, res) {
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
-    });
+    // req.end(function(err, res) {
+    //     var json = JSON.parse(res.text.trim());
+    //     (res.ok) ? cb(null, json) : cb(json, null);
+    // });
 };
 
 Relax.prototype.post = function(doc, cb) {
@@ -135,8 +130,19 @@ Relax.prototype.post = function(doc, cb) {
 Relax.prototype.bulk = function(doc, cb) {
     var mess = 'docs isnt array';
     if ('array' != type(doc)) return (cb) ? cb(mess) : new Error(mess);
-    var bulkpath = this.opts.dbpath + '/_bulk_docs';
-    var req = request.post(bulkpath).send({docs: doc});
+    var path = this.opts.dbpath + '/_bulk_docs';
+    var req = request.post(path).send({docs: doc});
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (err) ? cb(null, res) : cb(err, null);
+    });
+};
+
+Relax.prototype.all = function(doc, cb) {
+    var mess = 'docs isnt array';
+    if ('array' != type(doc)) return (cb) ? cb(mess) : new Error(mess);
+    var path = this.opts.dbpath + '/_all_docs';
+    var req = request.get(path);
     if (!cb) return req;
     req.end(function(err, res) {
         (err) ? cb(null, res) : cb(err, null);
@@ -164,20 +170,19 @@ Relax.prototype.getall = function(doc, cb) {
         });
 };
 
-Relax.prototype.push = function(doc, cb) {
-    var dbpath = this.opts.dbpath;
-    var path = this.opts.dbpath + '/' + doc._id;
-    getDoc(path, function(res) {
-        if (res.ok) {
-            var dbdoc = JSON.parse(res.text);
-            doc._rev = dbdoc._rev;
-        }
-        postDoc(dbpath, doc, function(res) {
-            var json = JSON.parse(res.text.trim());
-            (res.ok) ? cb(null, json) : cb(json, null);
-        });
-    })
-};
+// Relax.prototype.push = function(doc, cb) {
+//     var dbpath = this.opts.dbpath;
+//     var path = this.opts.dbpath + '/' + doc._id;
+//     request.get(path, function( err, res) {
+//         if (!res.ok) return cb(err);
+//         var dbdoc = JSON.parse(res.text);
+//         doc._rev = dbdoc._rev;
+//         request.put(path, function( err, res) {
+//             var json = JSON.parse(res.text.trim());
+//             (res.ok) ? cb(null, json) : cb(json, null);
+//         })
+//     }
+// };
 
 /*
  * design document handlers

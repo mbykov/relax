@@ -12,9 +12,7 @@ var name = 'relax-specs';
 relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-//return;
-
-//    .exists, .create, .drop, .info
+return;
 
 describe('MISC', function() {
     this.slow(500);
@@ -27,13 +25,6 @@ describe('MISC', function() {
     })
 
     describe('server methods', function(){
-        it('should get uuids with count', function(done){
-            relax.uuids(5, function(err, res){
-                (err == null).should.be.true;
-                res.length.should.equal(5);
-                done();
-            })
-        });
         it('should get uuids with count - chain', function(done){
             relax.uuids(5)
                 .end(function(err, res){
@@ -42,6 +33,13 @@ describe('MISC', function() {
                     done();
                 })
         });
+    });
+    it('should get uuids with count - callback', function(done){
+        relax.uuids(5, function(err, res){
+            (err == null).should.be.true;
+            res.length.should.equal(5);
+            done();
+        })
     });
     describe('database methods', function(){
         it('should show existing db', function(done){
