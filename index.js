@@ -98,7 +98,7 @@ Relax.prototype.get = function(doc, cb) {
     if (!cb) return req;
     req.end(function(err, res) {
         var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
+        (res.ok) ? cb(null, json) : cb(null, json);
     });
 }
 
@@ -110,10 +110,10 @@ Relax.prototype.put = function(doc, cb) {
     this.opts.tmp = null;
     var req = request.put(path).send(doc);
     if (!cb) return req;
-    // req.end(function(err, res) {
-    //     var json = JSON.parse(res.text.trim());
-    //     (res.ok) ? cb(null, json) : cb(json, null);
-    // });
+    req.end(function(err, res) {
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(null, json);
+    });
 };
 
 Relax.prototype.post = function(doc, cb) {
@@ -123,7 +123,7 @@ Relax.prototype.post = function(doc, cb) {
     if (!cb) return req;
     req.end(function(err, res) {
         var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
+        (res.ok) ? cb(null, json) : cb(null, json);
     });
 };
 
@@ -134,7 +134,9 @@ Relax.prototype.bulk = function(doc, cb) {
     var req = request.post(path).send({docs: doc});
     if (!cb) return req;
     req.end(function(err, res) {
-        (err) ? cb(null, res) : cb(err, null);
+        var json = JSON.parse(res.text.trim());
+        //log(err, res.text);
+        (err) ? cb(null, json) : cb(null, json);
     });
 };
 
@@ -145,7 +147,8 @@ Relax.prototype.all = function(doc, cb) {
     var req = request.get(path);
     if (!cb) return req;
     req.end(function(err, res) {
-        (err) ? cb(null, res) : cb(err, null);
+        var json = JSON.parse(res.text.trim());
+        (err) ? cb(null, json) : cb(null, json);
     });
 };
 
@@ -155,7 +158,7 @@ Relax.prototype.del = function(doc, cb) {
     if (!cb) return req;
     req.end(function(res) {
         var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(json, null);
+        (res.ok) ? cb(null, json) : cb(null, json);
     });
 }
 
@@ -179,7 +182,7 @@ Relax.prototype.getall = function(doc, cb) {
 //         doc._rev = dbdoc._rev;
 //         request.put(path, function( err, res) {
 //             var json = JSON.parse(res.text.trim());
-//             (res.ok) ? cb(null, json) : cb(json, null);
+//             (res.ok) ? cb(null, json) : cb(null, json);
 //         })
 //     }
 // };

@@ -12,9 +12,9 @@ var name = 'relax-specs';
 relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-return;
+//return;
 
-describe('CRUD-chain methods', function(){
+describe('CRUD-callback methods', function(){
     this.slow(500);
     var docs = makeDocs(5);
     var docs1 = makeDocs(6, 11);
@@ -40,57 +40,53 @@ describe('CRUD-chain methods', function(){
     describe('single doc', function(){
         it('should get existing doc', function(done){
             doc._id = uuid;
-            relax
-                .get(doc)
-                .end(function(err, res){
-                    //log(err, res.text);
+            relax.get(doc, function(err, res){
                     (err == null).should.be.true;
-                    JSON.parse(res.text).text.should.equal('some text');
+                    res.text.should.equal('some text');
                     done();
                 })
         })
         it('should get doc by id', function(done){
-            relax
-                .get(uuid)
-                .end(function(err, res){
+            relax.get(uuid, function(err, res){
                     (err == null).should.be.true;
-                    JSON.parse(res.text).text.should.equal('some text');
+                    res.text.should.equal('some text');
                     done();
                 })
         })
+        it('should not get missing doc', function(done){
+            relax.get('non-existing-id', function(err, res){
+                (err == null).should.be.true;
+                res.error.should.equal('not_found');
+                done();
+            })
+        })
         it('should not insert a new version of the document w/o rev', function(done){
             doc.text = 'new text';
-            relax
-                .put(doc)
-                .end(function(err, res){
-                    (err == null).should.be.true;
-                    JSON.parse(res.text).error.should.equal('conflict');
-                    done();
-                })
+            relax.put(doc, function(err, res){
+                (err == null).should.be.true;
+                res.error.should.equal('conflict');
+                done();
+            })
         })
         it('should insert a new version of the document', function(done){
             doc._rev = rev;
             doc.text = 'new text';
-            relax
-                .put(doc)
-                .end(function(err, res){
-                    (err == null).should.be.true;
-                    JSON.parse(res.text).ok.should.be.ok;
-                    rev = JSON.parse(res.text).rev;
-                    done();
-                })
+            relax.put(doc, function(err, res){
+                (err == null).should.be.true;
+                res.ok.should.be.ok;
+                rev = res.rev;
+                done();
+            })
         })
-
         it('should delete doc', function(done){
             doc._rev = rev;
-            relax
-                .del(doc)
-                .end(function(err, res){
-                    (err == null).should.be.true;
-                    res.ok.should.be.ok;
-                    done();
-                })
+            relax.del(doc, function(err, res){
+                (err == null).should.be.true;
+                res.ok.should.be.ok;
+                done();
+            })
         })
+
         // it('should push other doc', function(done){
         //     relax
         //         .push(other, function(err, res){
@@ -110,38 +106,34 @@ describe('CRUD-chain methods', function(){
         // })
     })
 
-    describe('array of doc', function(){
+    describe('array of docs', function(){
         it('should bulk save docs', function(done){
-            relax
-                .bulk(docs)
-                .end(function(err, res){
-                    (err == null).should.be.true;
-                    JSON.parse(res.text).forEach(function(row) {
-                        row.ok.should.be.ok;
-                    })
-                    done();
+            relax.bulk(docs, function(err, res){
+                (err == null).should.be.true;
+                res.forEach(function(row) {
+                    row.ok.should.be.ok;
                 })
+                done();
+            })
+        })
+        it('should not bulk save the same docs', function(done){
+            relax.bulk(docs, function(err, res){
+                (err == null).should.be.true;
+                res.forEach(function(row) {
+                    row.error.should.equal('conflict');
+                })
+                done();
+            })
         })
         it('should get all docs', function(done){
-            relax
-                .all(docs)
-                .end(function(err, res){
-                    (err == null).should.be.true;
-                    JSON.parse(res.text).total_rows.should.equal(5);
-                    done();
-                })
+            relax.all(docs, function(err, res){
+                (err == null).should.be.true;
+                res.total_rows.should.equal(5);
+                res.rows.length.should.equal(5);
+                done();
+            })
         })
-        it('should get some docs with query', function(done){
-            relax
-                .all(docs)
-                .query({startkey: '"1"', endkey: '"2"'})
-                .end(function(err, res){
-                    //log(err, res.text);
-                    (err == null).should.be.true;
-                    JSON.parse(res.text).rows.length.should.equal(2);
-                    done();
-                })
-        })
+
     })
 })
 
