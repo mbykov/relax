@@ -87,12 +87,15 @@ Relax.prototype.info = function(cb) {
  * CRUD methods for doc or docs array
 */
 
+function validate(fn, mess) {
+}
+
+
 Relax.prototype.get = function(doc, cb) {
     var id = docid(doc);
-    var mess = 'can not get - doc has no id';
-    if (!id) (cb) ? cb(mess, null) : new Error(mess);
+    if (!id) throw new Error('doc has no id');
 
-    var path = (this.opts.tmp || this.opts.dbpath) + '/' + docid(doc);
+    var path = (this.opts.tmp || this.opts.dbpath) + '/' + id;
     this.opts.tmp = null;
     var req = request.get(path); //.query({include_docs: true});
     if (!cb) return req;
@@ -350,9 +353,9 @@ function docrev(doc) {
     return null;
 }
 
-function validate(doc) {
-    if (!docid(doc) || !docrev(doc) ) return false;
-    return true;
-}
+// function validate(doc) {
+//     if (!docid(doc) || !docrev(doc) ) return false;
+//     return true;
+// }
 
 function log () { console.log.apply(console, arguments) }

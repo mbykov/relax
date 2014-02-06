@@ -12,7 +12,7 @@ var name = 'relax-specs';
 relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
 
-return;
+//return;
 
 describe('update method', function(){
     this.slow(500);
@@ -63,13 +63,6 @@ describe('update method', function(){
             done();
         })
     })
-
-    // 1. тесты на POST, без id;
-    // 2. что-то все же ломает меня два параметра. ;
-    // 2.5. и отказаться от callback формы?
-    // 3. а если relax.update('spec/inPlace').post(doc).end(...)
-    // 4. а view? relax.view('spec/byText').post(doc)
-    // 5.
 
     describe('update chainable', function(){
         it('should update existing doc', function(done){

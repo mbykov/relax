@@ -91,6 +91,9 @@ describe('CRUD-chain methods', function(){
                     done();
                 })
         })
+
+        // copy?
+        //
         // it('should push other doc', function(done){
         //     relax
         //         .push(other, function(err, res){
