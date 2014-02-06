@@ -2,16 +2,16 @@
 
 Relax is a small  [component](http://github.com/component/component) and node.js module.
 
-Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It will only help you not to write criminally-long http-requests in Couch style, leaving the rest to the mighty superagent. It can be a light replacement of a jquery.coush.js and has almost the same methods.
-
-Relax is tiny - 8K.
+Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a job to powerful superagent. It can be a lightweight replacement of a jquery.coush.js and has almost the same methods. Relax is tiny - 8K.
 
 ## Usage
 
+```javascript
 var Relax = require('relax');
 var relax = new Relax();
 relax.dbname('relax-specs');
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
+```
 
 ## Chainable or callback forms
 
@@ -20,20 +20,22 @@ Each method has chainable and callback-style api. Chainable form always returns 
 Chainable-form:
 
 ```javascript
-            relax
-                .get(doc)
-                .end(function(err, res){
-                    JSON.parse(res.text).text.should.equal('some text');
-                })
+relax
+  .get(doc)
+  .query({conflicts: true})
+  .set('X-API-Key', 'foobar')
+  .end(function(err, res){
+    JSON.parse(res.text).text.should.equal('some text');
+  })
 ```
 
 Callback-form:
 
 ```javascript
-            relax
-                .view('spec/byText', function(err, res) {
-                    res.rows[1].key.should.equal('some text');
-                })
+relax
+  .view('spec/byText', function(err, res) {
+    res.rows[1].key.should.equal('some text');
+  })
 ```
 
 
@@ -54,7 +56,7 @@ Callback-form:
 
 #### document methods
 
-- .get, .post, .put, .delete, .copy, .push (aka crude get-post)
+- .get, .post, .put, .delete, .copy, .push (aka crude get-then-post)
 
 #### array of documents methods
 
@@ -99,7 +101,9 @@ For full usage and API documentation, view the [documentation](http://github.com
 $ make test
 ```
 
+## Running browser tests
 
+TODO: description of process
 
 ## License
 

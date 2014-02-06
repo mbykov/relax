@@ -40,20 +40,46 @@ Relax.prototype.dbname = function(name) {
 
 Relax.prototype.exists = function(name, cb) {
     var path = this.opts.server+'/' + name;
-    request.head(path, function(res){cb(res.ok)});
+    var req = request.head(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, res.ok) : cb(null, res.ok);
+    });
 };
 
 Relax.prototype.create = function(name, cb) {
     var path = this.opts.server+'/' + name;
-    request.put(path, function(res){
-        (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+    var req = request.put(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, res.ok) : cb(null, JSON.parse(res.text.trim()) );
     });
 };
 
 Relax.prototype.drop = function(name, cb) {
     var path = this.opts.server+'/'+name;
-    request.del(path, function(res){
-        (res.ok) ? cb(null, res.ok) : cb(res.text.trim(), null);
+    var req = request.del(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, res.ok) : cb(null, JSON.parse(res.text.trim()) );
+    });
+};
+
+Relax.prototype.changes = function(cb) {
+    var path = this.opts.dbpath+'/_changes';
+    var req = request.get(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, JSON.parse(res.text.trim())) : cb(null, JSON.parse(res.text.trim()) );
+    });
+};
+
+Relax.prototype.info = function(cb) {
+    var path = this.opts.dbpath+'/';
+    var req = request.get(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, JSON.parse(res.text.trim())) : cb(null, JSON.parse(res.text.trim()) );
     });
 };
 
