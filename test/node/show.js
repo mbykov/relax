@@ -62,6 +62,7 @@ describe('SHOW method', function(){
                 .show('spec/justText')
                 .get(doc)
                 .end(function(res){
+                    log(res.text);
                     res.text.should.equal('just some text');
                     done();
                 });

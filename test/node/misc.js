@@ -37,7 +37,7 @@ describe('MISC', function() {
     it('should get uuids with count - callback', function(done){
         relax.uuids(5, function(err, res){
             (err == null).should.be.true;
-            res.length.should.equal(5);
+            res.uuids.length.should.equal(5);
             done();
         })
     });

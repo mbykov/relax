@@ -49,7 +49,6 @@ describe('VIEW method', function(){
             relax
                 .view('spec/byText')
                 .end(function(err, res){
-                    // log(err, JSON.parse(res.text).rows);
                     relax.frows(res).length.should.equal(5);
                     relax.frows(res)[0].key.should.equal('some text 0');
                     done();

@@ -12,14 +12,16 @@ var type = require('type');
 module.exports = Relax;
 
 /**
- * Initialize `Relax`
- */
-
+ *
+ * @class
+ * @param {String} uri
+ *
+ * @returns {relax} The instance on which this method was called.
+*/
 function Relax(uri) {
-    //if (!(this instanceof Relax)) return new Relax(uri);
     var defaults = url.parse('http://localhost:5984');
     uri = uri || '';
-    var opts = url.parse(uri)
+    var opts = url.parse(uri);
     this.opts = merge(defaults, opts);
     return this;
 }
@@ -28,6 +30,14 @@ function Relax(uri) {
  * Setters
 */
 
+
+/**
+ * Sets DB name
+ * @example
+ * relax.dbname(name);
+ * @param {String} name
+ * @returns {relax} The instance on which this method was called.
+ */
 Relax.prototype.dbname = function(name) {
     this.opts.dbname = name || '';
     this.opts.dbpath = this.opts.server+'/'+this.opts.dbname;
@@ -38,6 +48,17 @@ Relax.prototype.dbname = function(name) {
  * DB-level methods
 */
 
+/**
+ * Check if DB exists. DB-level method
+ * @param {String} name
+ * @param {Function} cb optional
+ * @returns {Boolean}
+ */
+// relax.exists(name).end(cb);
+// relax.exists(name, cb);
+//
+
+
 Relax.prototype.exists = function(name, cb) {
     var path = this.opts.server+'/' + name;
     var req = request.head(path);
@@ -47,6 +68,14 @@ Relax.prototype.exists = function(name, cb) {
     });
 };
 
+/**
+ * Creates database, requires admin privileges
+ *
+ * @couch `PUT /db`
+ * @param {String} name
+ * @param {Function} cb optional
+ * @returns {Object}
+ */
 Relax.prototype.create = function(name, cb) {
     var path = this.opts.server+'/' + name;
     var req = request.put(path);
@@ -56,6 +85,12 @@ Relax.prototype.create = function(name, cb) {
     });
 };
 
+/**
+ * Remove DB, requires admin privileges
+ * @param {String} name
+ * @param {Function} cb optional
+ * @returns {Object}
+ */
 Relax.prototype.drop = function(name, cb) {
     var path = this.opts.server+'/'+name;
     var req = request.del(path);
@@ -65,6 +100,11 @@ Relax.prototype.drop = function(name, cb) {
     });
 };
 
+/**
+ * Returns changes for the given database
+ * @param {Function} cb optional
+ * @returns {Object}
+ */
 Relax.prototype.changes = function(cb) {
     var path = this.opts.dbpath+'/_changes';
     var req = request.get(path);
@@ -74,6 +114,11 @@ Relax.prototype.changes = function(cb) {
     });
 };
 
+/**
+ * DB info
+ * @param {} cb optional
+ * @returns {Object}
+ */
 Relax.prototype.info = function(cb) {
     var path = this.opts.dbpath+'/';
     var req = request.get(path);
@@ -87,10 +132,25 @@ Relax.prototype.info = function(cb) {
  * CRUD methods for doc or docs array
 */
 
-function validate(fn, mess) {
-}
 
-
+/**
+ * DOC: get document
+ *
+ * memberOf Relax
+ *
+ * @example
+ *
+ *  relax
+ *    .get(doc)
+ *    .end(callback)
+ *
+ *  relax
+ *    .get(doc, callback)
+ *
+ * @param {String|Object} doc
+ * @param {Function} cb optional
+ * @returns {SA-request|Object}
+ */
 Relax.prototype.get = function(doc, cb) {
     var id = docid(doc);
     if (!id) throw new Error('doc has no id');
@@ -251,7 +311,7 @@ Relax.prototype.uuids = function(count, cb) {
     var req = request.get(path).query({count:count})
     if (!cb) return req;
     req.end(function(err, res){
-        (res.ok) ? cb(null, JSON.parse(res.text).uuids) : cb(err, null);
+        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
     });
 };
 
@@ -319,6 +379,7 @@ Relax.prototype.fdocs = function(res) {
 function fdocs(res) {
     return map(JSON.parse(res.text).rows, function(row) {return row.doc});
 }
+
 
 function merge(a, b) {
     var keys = Object.keys(b);

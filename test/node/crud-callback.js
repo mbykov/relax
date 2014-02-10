@@ -18,8 +18,10 @@ describe('CRUD-callback methods', function(){
     this.slow(500);
     var docs = makeDocs(5);
     var docs1 = makeDocs(6, 11);
-    var doc = {_id: 'some-id', text: 'some text', count: 1};
-    var other = {_id: 'other-id', text: 'other text', count: 2};
+    // var doc = {_id: 'some-id', text: 'some text', count: 1};
+    // var other = {_id: 'other-id', text: 'other text', count: 2};
+    var doc = {text: 'some text', count: 1};
+    var other = {text: 'other text', count: 2};
     var uuid, rev;
 
     before(function(done){
@@ -48,10 +50,10 @@ describe('CRUD-callback methods', function(){
         })
         it('should get doc by id', function(done){
             relax.get(uuid, function(err, res){
-                    (err == null).should.be.true;
-                    res.text.should.equal('some text');
-                    done();
-                })
+                (err == null).should.be.true;
+                res.text.should.equal('some text');
+                done();
+            })
         })
         it('should not get missing doc', function(done){
             relax.get('non-existing-id', function(err, res){

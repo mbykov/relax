@@ -1,0 +1,23 @@
+<h2 id="some-docs">some docs</h2>
+<h3 id="server-methods">server methods</h3>
+<h4 id="-uuids">.uuids</h4>
+<pre><code class="lang-javascript">  relax
+    .uuids()
+    .end(function(res) {
+      console.log(JSON.parse(res.text));
+    });</code></pre>
+<pre><code class="lang-bash">--&gt; {&quot;uuids&quot;:[&quot;11eaa495bfae96d36d6a53f21a01adf6&quot;,&quot;11eaa495bfae96d36d6a53f21a01b9b7&quot;]}</code></pre>
+<pre><code class="lang-javascript">  relax.uuids(5, function(err, res) {
+      console.log(res);
+  });</code></pre>
+<pre><code class="lang-bash">--&gt; [&quot;11eaa495bfae96d36d6a53f21a01adf6&quot;,&quot;11eaa495bfae96d36d6a53f21a01b9b7&quot;]</code></pre>
+<h3 id="database-methods">database methods</h3>
+<h4 id="-exists">.exists</h4>
+<pre><code class="lang-javascript">  relax
+  ;</code></pre>
+<pre><code>  relax
+    .exists(name)
+    .end(callback)</code></pre>
+<pre><code class="lang-javascript">  relax
+  ;</code></pre>
+

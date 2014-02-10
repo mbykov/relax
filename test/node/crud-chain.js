@@ -139,7 +139,6 @@ describe('CRUD-chain methods', function(){
                 .all(docs)
                 .query({startkey: '"1"', endkey: '"2"'})
                 .end(function(err, res){
-                    //log(err, res.text);
                     (err == null).should.be.true;
                     JSON.parse(res.text).rows.length.should.equal(2);
                     done();

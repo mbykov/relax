@@ -40,7 +40,9 @@ clean:
 # test:
 # 	@mocha-phantomjs test/index.html
 
+docs:
+	marked docs/index.md > docs/index.html
 
-.PHONY: test clean
+.PHONY: test clean docs
 
 #		--growl \

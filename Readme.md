@@ -2,7 +2,7 @@
 
 Relax is a small  [component](http://github.com/component/component) and node.js module.
 
-Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a job to powerful superagent. It can be a lightweight replacement of a jquery.coush.js and has almost the same methods. Relax is tiny - 8K.
+Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a job to powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Except those that are easier and more reasonable to use in the console. And it is is tiny ~ 8K.
 
 ## Usage
 
@@ -42,31 +42,176 @@ relax
 
 ## Methods
 
-#### setters
+### setters
 
 - .dbname
 
-#### server methods
+### session methods
 
-- .uuids, .info
+- .login, .logout, .session
 
-#### database methods
+### server methods
+
+- .uuids
+
+#### example:
+
+````javascript
+  relax
+    .uuids(2)
+    .end(function(res) {
+      console.log(JSON.parse(res.text));
+    });
+````
+````bash
+--> {"uuids":["11eaa495bfae96d36d6a53f21a01adf6","11eaa495bfae96d36d6a53f21a01b9b7"]}
+````
+
+````javascript
+  relax.uuids(2, function(err, res) {
+      console.log(res);
+  });
+````
+````bash
+--> ["11eaa495bfae96d36d6a53f21a01adf6","11eaa495bfae96d36d6a53f21a01b9b7"]
+````
+
+
+
+### database methods
 
 - .exists, .create, .drop, .info
 
-#### document methods
+#### example:
+
+````javascript
+relax.exists(name)
+  .end(function(err, res){
+    console.log(res.ok);
+  })
+````
+
+````bash
+--> true
+````
+
+### document methods
 
 - .get, .post, .put, .delete, .copy, .push (aka crude get-then-post)
 
-#### array of documents methods
+#### example:
+
+````javascript
+var doc = {text: 'some text', count: 1};
+relax.post(doc)
+  .end(function(err, res){
+    doc._id = res.id;
+    console.log(res);
+  })
+````
+
+````bash
+--> {
+  ok: true,
+  id: '11eaa495bfae96d36d6a53f21a0e357c',
+  rev: '1-69aed0cf2cf6e13d7209219e4e814c74' }
+````
+
+````javascript
+relax.get(doc, function(err, res){
+    console.log(res);
+  })
+````
+
+````bash
+--> {
+  _id: '11eaa495bfae96d36d6a53f21a0ede9d',
+  _rev: '1-69aed0cf2cf6e13d7209219e4e814c74',
+  text: 'some text',
+  count: 1 }
+````
+
+### array of documents methods
 
 - .all, .bulk
 
-#### design doc handlers
+````javascript
+relax
+  .all(docs)
+  .query({startkey: '"1"', endkey: '"2"'})
+  .end(function(err, res){
+    log(err, JSON.parse(res.text));
+  })
+````
 
-- .view, .show.get, .list.view, .update.post, .update.put
+````bash
+-->
+{ total_rows: 5,
+  offset: 1,
+  rows:
+   [ { id: '1', key: '1', value: [Object] },
+     { id: '2', key: '2', value: [Object] } ] }
+````
 
-#### not included
+### design doc handlers
+
+- **.view, .show.get, .list.view, .update.post, .update.put**
+
+**_view function** in design document:
+
+````javascript
+function(doc) { emit(doc.text, null) };
+````
+
+````javascript
+relax
+  .view('spec/byText')
+  .query({startkey:'"some text 1"', endkey:'"some text 3"'})
+  .end(function(err, res){
+    console.log(JSON.parse(res.text));
+  });
+````
+
+````bash
+-->
+{ total_rows: 5,
+  offset: 1,
+  rows:
+   [ { id: '1', key: 'some text 1', value: null },
+     { id: '2', key: 'some text 2', value: null },
+     { id: '3', key: 'some text 3', value: null } ] }
+````
+
+**_show function**:
+
+````javascript
+var justText = function(doc, req) {
+  return { body : "just " + doc.text };
+}
+
+var doc = {_id: 'some-id', text: 'some text', count: 0};
+
+var ddoc = {_id: '_design/spec', shows: {'justText': justText.toString() } };
+````
+
+````javascript
+relax
+  .show('spec/justText')
+  .get(doc)
+  .end(function(res){
+    console.log(res.text);
+  });
+````
+
+````bash
+-->
+just some text
+````
+
+
+
+
+### not included
 
 - .allDbs, .activeTasks, .stats, .config, .compact, .replicate, .viewCleanUp, etc
 
@@ -93,7 +238,7 @@ Or as standalone and minified version:
 
 ## API
 
-For full usage and API documentation, view the [documentation](http://github.com/).
+View more examples in test suite
 
 ## Running node tests
 
@@ -103,7 +248,7 @@ $ make test
 
 ## Running browser tests
 
-TODO: description of process
+include xxx
 
 ## License
 
