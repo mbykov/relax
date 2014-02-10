@@ -89,23 +89,22 @@ describe('CRUD-callback methods', function(){
             })
         })
 
-        // it('should push other doc', function(done){
-        //     relax
-        //         .push(other, function(err, res){
-        //             log(err, res.text)
-        //             // (err == null).should.be.true;
-        //             // (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
-        //             done();
-        //         })
-        // })
-        // it('should push the same doc again, nevertheless', function(done){
-        //     relax
-        //         .push(other, function(err, res){
-        //             (err == null).should.be.true;
-        //             (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
-        //             done();
-        //         })
-        // })
+        it('should push other doc', function(done){
+            relax
+                .push(other, function(err, res){
+                    (err == null).should.be.true;
+                    res.ok.should.be.ok;
+                    done();
+                })
+        })
+        it('should push the other doc again even w/o rev', function(done){
+            relax
+                .push(other, function(err, res){
+                    (err == null).should.be.true;
+                    res.ok.should.be.ok;
+                    done();
+                })
+        })
     })
 
     describe('array of docs', function(){
@@ -130,8 +129,8 @@ describe('CRUD-callback methods', function(){
         it('should get all docs', function(done){
             relax.all(docs, function(err, res){
                 (err == null).should.be.true;
-                res.total_rows.should.equal(5);
-                res.rows.length.should.equal(5);
+                res.total_rows.should.equal(7);
+                res.rows.length.should.equal(7);
                 done();
             })
         })

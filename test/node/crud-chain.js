@@ -91,26 +91,6 @@ describe('CRUD-chain methods', function(){
                     done();
                 })
         })
-
-        // copy?
-        //
-        // it('should push other doc', function(done){
-        //     relax
-        //         .push(other, function(err, res){
-        //             log(err, res.text)
-        //             // (err == null).should.be.true;
-        //             // (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
-        //             done();
-        //         })
-        // })
-        // it('should push the same doc again, nevertheless', function(done){
-        //     relax
-        //         .push(other, function(err, res){
-        //             (err == null).should.be.true;
-        //             (res.ok) ? res.ok.should.be.ok : res.error.should.equal('not_found');
-        //             done();
-        //         })
-        // })
     })
 
     describe('array of doc', function(){

@@ -2,24 +2,24 @@
 
 Relax is a small  [component](http://github.com/component/component) and node.js module.
 
-Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a job to powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Except those that are easier and more reasonable to use in the console. And it is is tiny ~ 8K.
+Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a heavy job to powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Except those that are easier and more reasonable to be used in the console. And it is is tiny ~ 8K.
 
 ## Usage
 
-```javascript
+````javascript
 var Relax = require('relax');
 var relax = new Relax();
 relax.dbname('relax-specs');
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
-```
+````
 
 ## Chainable or callback forms
 
-Each method has chainable and callback-style api. Chainable form always returns SA-response. While callbak form returns what you are expect from CouchDB:
+Each method has chainable and callback-style api. Chainable form always returns [superagent](http://github.com/visionmedia/superagent)-response. While callback form returns what you are expect to be returned from CouchDB:
 
 Chainable-form:
 
-```javascript
+````javascript
 relax
   .get(doc)
   .query({conflicts: true})
@@ -27,32 +27,34 @@ relax
   .end(function(err, res){
     JSON.parse(res.text).text.should.equal('some text');
   })
-```
+````
 
 Callback-form:
 
-```javascript
-relax
-  .view('spec/byText', function(err, res) {
-    res.rows[1].key.should.equal('some text');
-  })
-```
+````javascript
+relax.get(uuid, function(err, res){
+  res.text.should.equal('some text');
+})
+````
 
+## complex ddoc handlers
+
+Note complex form of ddoc handlers **.show().get(), .list().view(), .update().post(), .update().put()**
 
 
 ## Methods
 
 ### setters
 
-- .dbname
+**- .dbname()**
 
 ### session methods
 
-- .login, .logout, .session
+**- .login(), .logout(), .session()**
 
 ### server methods
 
-- .uuids
+**- .uuids()**
 
 #### example:
 
@@ -76,11 +78,9 @@ relax
 --> ["11eaa495bfae96d36d6a53f21a01adf6","11eaa495bfae96d36d6a53f21a01b9b7"]
 ````
 
-
-
 ### database methods
 
-- .exists, .create, .drop, .info
+**- .exists(), .create(), .drop(), .info()**
 
 #### example:
 
@@ -97,7 +97,7 @@ relax.exists(name)
 
 ### document methods
 
-- .get, .post, .put, .delete, .copy, .push (aka crude get-then-post)
+**- .get(), .post(), .put(), .del(), .push()** (aka crude get-then-put, use .update instead)
 
 #### example:
 
@@ -133,7 +133,7 @@ relax.get(doc, function(err, res){
 
 ### array of documents methods
 
-- .all, .bulk
+**- .all(), .bulk()**
 
 ````javascript
 relax
@@ -155,7 +155,7 @@ relax
 
 ### design doc handlers
 
-- **.view, .show.get, .list.view, .update.post, .update.put**
+**- .view(), .show().get(), .list().view(), .update().post(), .update().put()**
 
 **_view function** in design document:
 
@@ -209,11 +209,9 @@ just some text
 ````
 
 
-
-
 ### not included
 
-- .allDbs, .activeTasks, .stats, .config, .compact, .replicate, .viewCleanUp, etc
+**- .allDbs, .activeTasks, .stats, .config, .compact, .replicate, .viewCleanUp, etc**
 
 if you need them,  use straight SA-request.get(path) instead
 
@@ -221,20 +219,20 @@ if you need them,  use straight SA-request.get(path) instead
 
 With node.js:
 
-```bash
+````bash
 $ npm install relax-component
-```
+````
 or with [component](http://github.com/component/component)
 
-```bash
+````bash
 $ component install mbykov/relax
-```
+````
 
 Or as standalone and minified version:
 
-```html
+````html
 <script src="relax.min.js"></script>
-```
+````
 
 ## API
 
@@ -242,9 +240,9 @@ View more examples in test suite
 
 ## Running node tests
 
-```bash
+````bash
 $ make test
-```
+````
 
 ## Running browser tests
 

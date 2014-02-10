@@ -154,16 +154,16 @@ Relax.prototype.info = function(cb) {
 Relax.prototype.get = function(doc, cb) {
     var id = docid(doc);
     if (!id) throw new Error('doc has no id');
-
     var path = (this.opts.tmp || this.opts.dbpath) + '/' + id;
     this.opts.tmp = null;
-    var req = request.get(path); //.query({include_docs: true});
+    var req = request.get(path);
     if (!cb) return req;
     req.end(function(err, res) {
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(null, json);
     });
 }
+
 
 Relax.prototype.put = function(doc, cb) {
     var id = docid(doc);
@@ -225,30 +225,37 @@ Relax.prototype.del = function(doc, cb) {
     });
 }
 
-Relax.prototype.getall = function(doc, cb) {
-    // FIXME: all?
-    var path = this.opts.server + '/_all_docs';
-    request
-        .get(path)
-        .query({include_docs: true})
-        .end( function(res){
-            (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
-        });
+Relax.prototype.push = function(doc, cb) {
+    var dbpath = this.opts.dbpath;
+    var path = this.opts.dbpath + '/' + doc._id;
+    request.get(path, function( err, res) {
+        if (res.ok) {
+            var dbdoc = JSON.parse(res.text);
+            doc._rev = dbdoc._rev;
+            request.put(dbpath).send(doc).end(function( err, res) {
+                var json = JSON.parse(res.text.trim());
+                (res.ok) ? cb(null, json) : cb(null, json);
+            });
+        } else {
+            request.post(dbpath).send(doc).end(function( err, res) {
+                var json = JSON.parse(res.text.trim());
+                (res.ok) ? cb(null, json) : cb(null, json);
+            });
+        }
+    });
 };
 
-// Relax.prototype.push = function(doc, cb) {
-//     var dbpath = this.opts.dbpath;
-//     var path = this.opts.dbpath + '/' + doc._id;
-//     request.get(path, function( err, res) {
-//         if (!res.ok) return cb(err);
-//         var dbdoc = JSON.parse(res.text);
-//         doc._rev = dbdoc._rev;
-//         request.put(path, function( err, res) {
-//             var json = JSON.parse(res.text.trim());
-//             (res.ok) ? cb(null, json) : cb(null, json);
-//         })
-//     }
+// Relax.prototype.getall_ = function(doc, cb) {
+//     // FIXME: all?
+//     var path = this.opts.server + '/_all_docs';
+//     request
+//         .get(path)
+//         .query({include_docs: true})
+//         .end( function(res){
+//             (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
+//         });
 // };
+
 
 /*
  * design document handlers
