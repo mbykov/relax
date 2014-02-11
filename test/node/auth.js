@@ -11,10 +11,18 @@ try {
 
 var relax = new Relax();
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
-var user = {name: 'username', password: 'userpass'};
+var user, name;
 
 describe('AUTH', function(){
     this.slow(500);
+
+    before(function(done){
+        relax.uuids(1, function(err, res){
+            name = res.uuids[0];
+            user = {name: name, password: 'userpass'};
+            done();
+        })
+    })
 
     describe('cookie authentication', function(){
         it('should sign-up new user', function(done){
@@ -23,7 +31,7 @@ describe('AUTH', function(){
                     res.error.should.equal('conflict');
                 } else {
                     res.ok.should.be.ok;
-                    res.id.should.equal('org.couchdb.user:username');
+                    res.id.should.equal('org.couchdb.user:' + name);
                 }
                 done();
             });
@@ -34,7 +42,7 @@ describe('AUTH', function(){
                     res.reason.should.equal('badarg');
                 } else {
                     res.ok.should.be.ok;
-                    res.name.should.equal('username');
+                    res.name.should.equal(name);
                 }
                 done();
             });
@@ -43,7 +51,7 @@ describe('AUTH', function(){
             relax.session(function(err, res) {
                 res.ok.should.be.ok;
                 // this line works only in browser:
-                //res.userCtx.name.should.equal('username');
+                //res.userCtx.name.should.equal(name);
                 done();
             });
         })
