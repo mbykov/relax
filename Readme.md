@@ -2,7 +2,7 @@
 
 Relax is a small  [component](http://github.com/component/component) and node.js module.
 
-Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a heavy job to powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Except those that are easier and more reasonable to be used in the console. And it is is tiny ~ 8K.
+Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a heavy job to powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Except those that are easier and more reasonable to be used in the console. And it is is tiny ~ 10K.
 
 ## Usage
 
@@ -157,7 +157,7 @@ relax
 
 **- .view(), .show().get(), .list().view(), .update().post(), .update().put()**
 
-**_view function** in design document:
+**_view** in design document:
 
 ````javascript
 function(doc) { emit(doc.text, null) };
@@ -182,7 +182,7 @@ relax
      { id: '3', key: 'some text 3', value: null } ] }
 ````
 
-**_show function**:
+**_show**:
 
 ````javascript
 var justText = function(doc, req) {
@@ -207,6 +207,10 @@ relax
 -->
 just some text
 ````
+
+**_list**
+
+
 
 
 ### not included
