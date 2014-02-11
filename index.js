@@ -11,13 +11,6 @@ var type = require('type');
 
 module.exports = Relax;
 
-/**
- *
- * @class
- * @param {String} uri
- *
- * @returns {relax} The instance on which this method was called.
-*/
 function Relax(uri) {
     var defaults = url.parse('http://localhost:5984');
     uri = uri || '';
@@ -30,14 +23,6 @@ function Relax(uri) {
  * Setters
 */
 
-
-/**
- * Sets DB name
- * @example
- * relax.dbname(name);
- * @param {String} name
- * @returns {relax} The instance on which this method was called.
- */
 Relax.prototype.dbname = function(name) {
     this.opts.dbname = name || '';
     this.opts.dbpath = this.opts.server+'/'+this.opts.dbname;
@@ -48,17 +33,6 @@ Relax.prototype.dbname = function(name) {
  * DB-level methods
 */
 
-/**
- * Check if DB exists. DB-level method
- * @param {String} name
- * @param {Function} cb optional
- * @returns {Boolean}
- */
-// relax.exists(name).end(cb);
-// relax.exists(name, cb);
-//
-
-
 Relax.prototype.exists = function(name, cb) {
     var path = this.opts.server+'/' + name;
     var req = request.head(path);
@@ -68,14 +42,6 @@ Relax.prototype.exists = function(name, cb) {
     });
 };
 
-/**
- * Creates database, requires admin privileges
- *
- * @couch `PUT /db`
- * @param {String} name
- * @param {Function} cb optional
- * @returns {Object}
- */
 Relax.prototype.create = function(name, cb) {
     var path = this.opts.server+'/' + name;
     var req = request.put(path);
@@ -85,12 +51,6 @@ Relax.prototype.create = function(name, cb) {
     });
 };
 
-/**
- * Remove DB, requires admin privileges
- * @param {String} name
- * @param {Function} cb optional
- * @returns {Object}
- */
 Relax.prototype.drop = function(name, cb) {
     var path = this.opts.server+'/'+name;
     var req = request.del(path);
@@ -100,11 +60,6 @@ Relax.prototype.drop = function(name, cb) {
     });
 };
 
-/**
- * Returns changes for the given database
- * @param {Function} cb optional
- * @returns {Object}
- */
 Relax.prototype.changes = function(cb) {
     var path = this.opts.dbpath+'/_changes';
     var req = request.get(path);
@@ -114,11 +69,6 @@ Relax.prototype.changes = function(cb) {
     });
 };
 
-/**
- * DB info
- * @param {} cb optional
- * @returns {Object}
- */
 Relax.prototype.info = function(cb) {
     var path = this.opts.dbpath+'/';
     var req = request.get(path);
@@ -132,25 +82,6 @@ Relax.prototype.info = function(cb) {
  * CRUD methods for doc or docs array
 */
 
-
-/**
- * DOC: get document
- *
- * memberOf Relax
- *
- * @example
- *
- *  relax
- *    .get(doc)
- *    .end(callback)
- *
- *  relax
- *    .get(doc, callback)
- *
- * @param {String|Object} doc
- * @param {Function} cb optional
- * @returns {SA-request|Object}
- */
 Relax.prototype.get = function(doc, cb) {
     var id = docid(doc);
     if (!id) throw new Error('doc has no id');
@@ -163,7 +94,6 @@ Relax.prototype.get = function(doc, cb) {
         (res.ok) ? cb(null, json) : cb(null, json);
     });
 }
-
 
 Relax.prototype.put = function(doc, cb) {
     var id = docid(doc);
@@ -190,6 +120,16 @@ Relax.prototype.post = function(doc, cb) {
     });
 };
 
+Relax.prototype.del = function(doc, cb) {
+    var path = this.opts.dbpath + '/' + docid(doc);
+    var req = request.del(path).query({rev: docrev(doc)})
+    if (!cb) return req;
+    req.end(function(res) {
+        var json = JSON.parse(res.text.trim());
+        (res.ok) ? cb(null, json) : cb(null, json);
+    });
+}
+
 Relax.prototype.bulk = function(doc, cb) {
     var mess = 'docs isnt array';
     if ('array' != type(doc)) return (cb) ? cb(mess) : new Error(mess);
@@ -198,7 +138,6 @@ Relax.prototype.bulk = function(doc, cb) {
     if (!cb) return req;
     req.end(function(err, res) {
         var json = JSON.parse(res.text.trim());
-        //log(err, res.text);
         (err) ? cb(null, json) : cb(null, json);
     });
 };
@@ -214,16 +153,6 @@ Relax.prototype.all = function(doc, cb) {
         (err) ? cb(null, json) : cb(null, json);
     });
 };
-
-Relax.prototype.del = function(doc, cb) {
-    var path = this.opts.dbpath + '/' + docid(doc);
-    var req = request.del(path).query({rev: docrev(doc)})
-    if (!cb) return req;
-    req.end(function(res) {
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(null, json);
-    });
-}
 
 Relax.prototype.push = function(doc, cb) {
     var dbpath = this.opts.dbpath;
@@ -245,18 +174,6 @@ Relax.prototype.push = function(doc, cb) {
     });
 };
 
-// Relax.prototype.getall_ = function(doc, cb) {
-//     // FIXME: all?
-//     var path = this.opts.server + '/_all_docs';
-//     request
-//         .get(path)
-//         .query({include_docs: true})
-//         .end( function(res){
-//             (res.ok) ? cb(null, fdocs(res)) : cb(res.text.trim(), null);
-//         });
-// };
-
-
 /*
  * design document handlers
  *
@@ -268,7 +185,6 @@ Relax.prototype.view = function(method, cb) {
     var parts = method.split('/');
     if (this.opts.tmp) {
         var path = this.opts.tmp + '/' + parts[1];
-        log('TMP'); // FIXME: другое view - match? ==== тестировать =====
         this.opts.tmp = null;
     } else {
         var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
@@ -321,7 +237,6 @@ Relax.prototype.uuids = function(count, cb) {
         (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
     });
 };
-
 
 /*
  * Authentication methods
