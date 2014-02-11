@@ -332,7 +332,7 @@ Relax.prototype.login = function(user, cb) {
     var req = request.post(path).send(user);
     if (!cb) return req;
     req.end(function(err, res) {
-        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+        (!err) ? cb(null, JSON.parse(res.text)) : cb(err, null);
     });
 };
 
@@ -355,18 +355,15 @@ Relax.prototype.session = function(cb) {
 };
 
 Relax.prototype.signup = function(user, cb) {
-    var path = this.opts.server + '/_users';
     user.roles = user.roles || [];
     user.type = "user";
     var user_prefix = "org.couchdb.user:";
     user._id = user._id || user_prefix + user.name;
-    var req = request.put(path);
-    log('REQ', req);
+    var path = this.opts.server + '/_users/' + user._id;
+    var req = request.put(path).send(user);
     if (!cb) return req;
     req.end(function(err, res) {
-        log('SIGN', err, res.text);
-        cb(null, null);
-        //(res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+        (!err) ? cb(null, JSON.parse(res.text)) : cb(err, null);
     });
 };
 
