@@ -327,42 +327,47 @@ Relax.prototype.uuids = function(count, cb) {
  * Authentication methods
  */
 
-Relax.prototype.login = function(name, password, cb) {
+Relax.prototype.login = function(user, cb) {
     var path = this.opts.server + '/_session';
-    request
-        .post(path)
-        .send({name: name, password: password})
-        .end(function(res) {
-            cb(res);
-        });
+    var req = request.post(path).send(user);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+    });
 };
 
 Relax.prototype.logout = function(cb) {
     var path = this.opts.server + '/_session';
-    request
-        .del(path)
-        .end(function(res) {
-            cb(res);
-        });
+    var req = request.del(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+    });
 };
 
 Relax.prototype.session = function(cb) {
     var path = this.opts.server + '/_session';
-    request
-        .get(path)
-        .end(function(res) {
-            cb(res);
-        });
+    var req = request.get(path);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        (res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+    });
 };
 
-Relax.prototype.signup = function(cb) {
-    // FIXME:
-    // var path = this.opts.server + '/_session';
-    // request
-    //     .get(path)
-    //     .end(function(res) {
-    //         cb(res);
-    //     });
+Relax.prototype.signup = function(user, cb) {
+    var path = this.opts.server + '/_users';
+    user.roles = user.roles || [];
+    user.type = "user";
+    var user_prefix = "org.couchdb.user:";
+    user._id = user._id || user_prefix + user.name;
+    var req = request.put(path);
+    log('REQ', req);
+    if (!cb) return req;
+    req.end(function(err, res) {
+        log('SIGN', err, res.text);
+        cb(null, null);
+        //(res.ok) ? cb(null, JSON.parse(res.text)) : cb(err, null);
+    });
 };
 
 /*

@@ -165,15 +165,6 @@ describe('MISC', function() {
             })
         });
 
-
-        // it('should get uuids with count - chain', function(done){
-        //     relax.uuids(5)
-        //         .end(function(err, res){
-        //             (err == null).should.be.true;
-        //             JSON.parse(res.text).uuids.length.should.equal(5);
-        //             done();
-        //         })
-        // });
     });
 
 
