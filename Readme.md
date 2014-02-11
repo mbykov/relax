@@ -2,7 +2,7 @@
 
 Relax is a small  [component](http://github.com/component/component) and node.js module.
 
-Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a heavy job to powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Except those that are easier and more reasonable to be used in the console. And it is is tiny ~ 10K.
+Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a heavy job to powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Yet except those that are easier and more reasonable to be used in the console. And it is is tiny ~ 10K as non-minified component, and ~20K in standalone form.
 
 ## Usage
 
@@ -86,8 +86,8 @@ Note complex form of ddoc handlers **.show().get(), .list().view(), .update().po
 
 ````javascript
 relax.exists(name)
-  .end(function(err, res){
-    console.log(res.ok);
+    .end(function(err, res){
+      console.log(res.ok);
   })
 ````
 
@@ -104,9 +104,9 @@ relax.exists(name)
 ````javascript
 var doc = {text: 'some text', count: 1};
 relax.post(doc)
-  .end(function(err, res){
-    doc._id = res.id;
-    console.log(res);
+    .end(function(err, res){
+        doc._id = res.id;
+        console.log(res);
   })
 ````
 
@@ -119,7 +119,7 @@ relax.post(doc)
 
 ````javascript
 relax.get(doc, function(err, res){
-    console.log(res);
+     console.log(res);
   })
 ````
 
@@ -137,10 +137,10 @@ relax.get(doc, function(err, res){
 
 ````javascript
 relax
-  .all(docs)
-  .query({startkey: '"1"', endkey: '"2"'})
-  .end(function(err, res){
-    log(err, JSON.parse(res.text));
+   .all(docs)
+   .query({startkey: '"1"', endkey: '"2"'})
+   .end(function(err, res){
+      log(err, JSON.parse(res.text));
   })
 ````
 
@@ -165,14 +165,14 @@ design document:
 function(doc) { emit(doc.text, null) };
 ````
 
-program:
+component:
 
 ````javascript
 relax
-  .view('spec/byText')
-  .query({startkey:'"some text 1"', endkey:'"some text 3"'})
-  .end(function(err, res){
-    console.log(JSON.parse(res.text));
+   .view('spec/byText')
+   .query({startkey:'"some text 1"', endkey:'"some text 3"'})
+   .end(function(err, res){
+      console.log(JSON.parse(res.text));
   });
 ````
 
@@ -192,26 +192,25 @@ design document:
 
 ````javascript
 var justText = function(doc, req) {
-  return { body : "just " + doc.text };
+   return { body : "just " + doc.text };
 }
 var doc = {_id: 'some-id', text: 'some text', count: 0};
 var ddoc = {_id: '_design/spec', shows: {'justText': justText.toString() } };
 ````
 
-program:
+component:
 
 ````javascript
 relax
-  .show('spec/justText')
-  .get(doc)
-  .end(function(res){
-    console.log(res.text);
+   .show('spec/justText')
+   .get(doc)
+   .end(function(res){
+      console.log(res.text);
   });
 ````
 
 ````bash
--->
-just some text
+--> just some text
 ````
 
 **_list**
@@ -219,34 +218,60 @@ just some text
 design document:
 
 ````javascript
-    var basicList = function(head, req) {
-        start({"headers":{"Content-Type" : "text/html"}});
-        send("head");
-        var row;
-        while(row = getRow()) {
-            send(row.key);
-        };
-        return "tail";
-    };
+var basicList = function(head, req) {
+   start({"headers":{"Content-Type" : "text/html"}});
+   var row;
+   while(row = getRow()) {
+      send(row.key);
+  };
+}
 ````
 
-program:
+component:
 
 ````javascript
 relax
-  .list('spec/basicList')
-  .view('spec/basicView', function(err, res) {
-    log(res.text);
+   .list('spec/basicList')
+   .view('spec/basicView', function(err, res) {
+      console.log(res.text);
   });
 ````
 
 ````bash
--->
-headsome texttail
+--> some text
 ````
 
+**_update**
 
-### not included
+design document:
+
+````javascript
+var inPlace = function(doc, req) {
+   var field = req.query.field;
+   var value = req.query.value;
+   var message = "set "+field+" to "+value;
+   doc[field] = value;
+   return [doc, message];
+}
+````
+
+component:
+
+````javascript
+relax
+   .update('spec/inPlace/')
+   .put(doc._id)
+   .query({field:'world', value:'test'})
+   .end(function(err, res){
+      console.log(res.text);
+   });
+````
+
+````bash
+--> set world to test
+````
+
+### not yet included
 
 **- .allDbs, .activeTasks, .stats, .config, .compact, .replicate, .viewCleanUp, etc**
 
