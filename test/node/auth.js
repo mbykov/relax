@@ -61,6 +61,13 @@ describe('AUTH', function(){
                 done();
             });
         })
+        it('should log-in my user back, or next tests fail', function(done){
+            user = {name: 'm.bykov@gmail.com', password: 'm.bykov@gmail.com'};
+            relax.login(user, function(err, res) {
+                res.ok.should.be.ok;
+                done();
+            });
+        })
     })
 
 })
