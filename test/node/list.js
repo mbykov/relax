@@ -39,7 +39,7 @@ describe('LIST method', function(){
         send("head");
         var row;
         while(row = getRow()) {
-            //log("=========row: "+toJSON(row));
+            //log(toJSON(row));
             send(row.key);
         };
         return "tail";
@@ -51,7 +51,6 @@ describe('LIST method', function(){
         while(row = getRow()) {
             var obj = {};
             obj[row.key] = row.value;
-            //res.push(toJSON(obj));
             res.push(obj);
         };
         return toJSON(res);
@@ -83,7 +82,7 @@ describe('LIST method', function(){
     })
 
     describe('list', function(){
-        it('should list existing doc MAIN', function(done){
+        it('should list existing doc by get', function(done){
             //var xhr = CouchDB.request("GET", "/test_suite_db/_design/lists/_list/basicBasic/basicView");
             // var xhr = CouchDB.request("GET", "/relax-specs/_design/spec/_list/basicList/basicView");
             // log('APACHE', xhr.status);
@@ -98,8 +97,7 @@ describe('LIST method', function(){
             relax
                 .list('spec/basicList')
                 .view('spec/basicView', function(err, res) {
-                    //log(err, res);
-                    // res.text.should.equal('headsome texttail');
+                    res.should.equal('headsome texttail');
                     done();
                 });
         });

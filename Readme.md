@@ -157,11 +157,15 @@ relax
 
 **- .view(), .show().get(), .list().view(), .update().post(), .update().put()**
 
-**_view** in design document:
+**_view**
+
+design document:
 
 ````javascript
 function(doc) { emit(doc.text, null) };
 ````
+
+program:
 
 ````javascript
 relax
@@ -182,17 +186,19 @@ relax
      { id: '3', key: 'some text 3', value: null } ] }
 ````
 
-**_show**:
+**_show**
+
+design document:
 
 ````javascript
 var justText = function(doc, req) {
   return { body : "just " + doc.text };
 }
-
 var doc = {_id: 'some-id', text: 'some text', count: 0};
-
 var ddoc = {_id: '_design/spec', shows: {'justText': justText.toString() } };
 ````
+
+program:
 
 ````javascript
 relax
@@ -210,7 +216,34 @@ just some text
 
 **_list**
 
+design document:
 
+````javascript
+    var basicList = function(head, req) {
+        start({"headers":{"Content-Type" : "text/html"}});
+        send("head");
+        var row;
+        while(row = getRow()) {
+            send(row.key);
+        };
+        return "tail";
+    };
+````
+
+program:
+
+````javascript
+relax
+  .list('spec/basicList')
+  .view('spec/basicView', function(err, res) {
+    log(res.text);
+  });
+````
+
+````bash
+-->
+headsome texttail
+````
 
 
 ### not included
