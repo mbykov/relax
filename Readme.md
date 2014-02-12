@@ -2,7 +2,7 @@
 
 Relax is a lightweight, component-based, high-level CouchDB client. It's built upon [superagent](http://github.com/visionmedia/superagent) library. Relax API eliminates the need to write so criminally-long HTTP-requests in the Couch style. Relax API has been inspired by the [jQuery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script)  API.
 
-It's available as a 1) [component](http://github.com/component/component) package or as a 2) node.js module, (named relax-component) or as 3) standalone script. As script is only ~6K minified and gzipped.
+It's available as a 1) [component](http://github.com/component/component) package or as a 2) node.js module, (named relax-component) or as 3) standalone script. As script it is only ~6K minified and gzipped.
 
 ## Usage
 
