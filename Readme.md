@@ -2,7 +2,7 @@
 
 Relax is a small  [component](http://github.com/component/component) and node.js module.
 
-Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a heavy job to powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Yet except those that are easier and more reasonable to be used in the console. And it is is tiny ~ 10K as non-minified component, and ~20K in standalone form.
+Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a heavy job to a powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Except those that are easier and more reasonable to be used in the console. And it is is tiny ~ 10K as non-minified component, and ~20K in standalone form.
 
 ## Usage
 
@@ -298,7 +298,7 @@ Or as standalone and minified version:
 
 ## API
 
-View more examples in test suite
+View more examples in [test suite](https://github.com/mbykov/relax/tree/master/test/node)
 
 ## Running node tests
 
