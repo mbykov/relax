@@ -1,8 +1,8 @@
 # Relax, superagent on a couch
 
-Relax is a small  [component](http://github.com/component/component) and node.js module.
+Relax is a lightweight, component-based, high-level CouchDB client. It's built upon [superagent](http://github.com/visionmedia/superagent) library. Relax API eliminates the need to write so criminally-long HTTP-requests in the Couch style. Relax API has been inspired by the [jQuery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script)  API.
 
-Relax is a high-level CouchDB client on a top of [superagent](http://github.com/visionmedia/superagent). It's goal is to help you write not so criminally-long http-requests in Couch style, leaving the rest of a heavy job to a powerful superagent. It can be a lightweight replacement of a [jquery.couch.js](https://github.com/apache/couchdb/tree/master/share/www/script) and has almost the same methods. Except those that are easier and more reasonable to be used in the console. And it is is tiny ~ 10K as non-minified component, and ~20K in standalone form.
+It's available as a 1) [component](http://github.com/component/component) package or as a 2) node.js module, (named relax-component) or as 3) standalone script. As script is only ~6K minified and gzipped.
 
 ## Usage
 
@@ -44,19 +44,19 @@ Note complex form of ddoc handlers **.show().get(), .list().view(), .update().po
 
 ## Methods
 
-### setters
+### setters:
 
 **- .dbname()**
 
-### session methods
+### session methods:
 
-**- .login(), .logout(), .session()**
+**- .login(), .logout(), .session(), .signup()**
 
-### server methods
+### server methods:
 
 **- .uuids()**
 
-#### example:
+#### example
 
 ````javascript
   relax
@@ -78,11 +78,11 @@ Note complex form of ddoc handlers **.show().get(), .list().view(), .update().po
 --> ["11eaa495bfae96d36d6a53f21a01adf6","11eaa495bfae96d36d6a53f21a01b9b7"]
 ````
 
-### database methods
+### database methods:
 
 **- .exists(), .create(), .drop(), .info()**
 
-#### example:
+#### example
 
 ````javascript
 relax.exists(name)
@@ -95,11 +95,11 @@ relax.exists(name)
 --> true
 ````
 
-### document methods
+### document methods:
 
 **- .get(), .post(), .put(), .del(), .push()** (aka crude get-then-put, use .update instead)
 
-#### example:
+#### example
 
 ````javascript
 var doc = {text: 'some text', count: 1};
@@ -131,7 +131,7 @@ relax.get(doc, function(err, res){
   count: 1 }
 ````
 
-### array of documents methods
+### array of documents methods:
 
 **- .all(), .bulk()**
 
@@ -153,7 +153,7 @@ relax
      { id: '2', key: '2', value: [Object] } ] }
 ````
 
-### design doc handlers
+### design doc handlers:
 
 **- .view(), .show().get(), .list().view(), .update().post(), .update().put()**
 

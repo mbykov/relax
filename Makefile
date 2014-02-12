@@ -12,6 +12,7 @@ relax: components index.js test/node/*.js
 	@component build  --use component-minify\
 		--standalone relax \
 		--out . --name relax.min
+		gzip -c relax.min.js > relax.min.js.gz
 
 test:
 	@NODE_ENV=test ./node_modules/.bin/mocha \
