@@ -4,10 +4,14 @@
     "version": "0.0.1",
     "dependencies": {
         "url": "*",
-        "type": "*",
+        "type-component": "*",
         "superagent": "*",
         "map-component": "*"
     },
+    "keywords": [
+        "couchdb",
+        "superagent"
+    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/mbykov/relax.git"

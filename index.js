@@ -3,11 +3,11 @@ var request = require('superagent');
 
 try {
     var map = require('map-component');
+    var type = require('type-component');
 } catch (err) {
     var map = require('map');
+    var type = require('type');
 }
-
-var type = require('type');
 
 module.exports = Relax;
 

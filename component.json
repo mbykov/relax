@@ -1,12 +1,11 @@
 {
   "name": "relax",
   "repo": "mbykov/relax",
-  "description": "superagent-on-a-couch",
+  "description": "superagent on a couch",
   "version": "0.0.1",
   "keywords": [],
     "dependencies": {
         "visionmedia/superagent": "*",
-        "juliangruber/isarray": "*",
         "component/type": "*",
         "component/map": "*",
         "component/url": "*"
