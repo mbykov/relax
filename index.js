@@ -338,9 +338,4 @@ function docrev(doc) {
     return null;
 }
 
-// function validate(doc) {
-//     if (!docid(doc) || !docrev(doc) ) return false;
-//     return true;
-// }
-
 function log () { console.log.apply(console, arguments) }

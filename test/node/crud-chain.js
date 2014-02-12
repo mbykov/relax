@@ -43,7 +43,6 @@ describe('CRUD-chain methods', function(){
             relax
                 .get(doc)
                 .end(function(err, res){
-                    //log(err, res.text);
                     (err == null).should.be.true;
                     JSON.parse(res.text).text.should.equal('some text');
                     done();
@@ -98,7 +97,6 @@ describe('CRUD-chain methods', function(){
             relax
                 .bulk(docs)
                 .end(function(err, res){
-                    //log(err, res.text);
                     (err == null).should.be.true;
                     JSON.parse(res.text).forEach(function(row) {
                         row.ok.should.be.ok;

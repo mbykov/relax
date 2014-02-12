@@ -1,7 +1,3 @@
-#TESTS = test/node/couch_api.js
-#TESTS = test/node/db_api.js
-#TESTS = test/node/query_opts.js
-#TESTS = test/node/view_api.js
 TESTS = test/node/*.js
 #REPORTER = dot
 REPORTER = spec
@@ -41,8 +37,6 @@ clean:
 # 	@mocha-phantomjs test/index.html
 
 docs:
-	marked docs/index.md > docs/index.html
+	marked Readme.md > Junk/Readme.html
 
 .PHONY: test clean docs
-
-#		--growl \
