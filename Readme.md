@@ -308,7 +308,7 @@ $ make test
 
 ## Running browser tests
 
-include xxx
+push test/* to local couchdb, and open text/index.html
 
 ## License
 
