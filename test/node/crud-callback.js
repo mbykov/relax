@@ -1,5 +1,4 @@
 //
-//var zero;
 
 try {
     var Relax = require('relax');
@@ -11,8 +10,6 @@ var relax = new Relax();
 var name = 'relax-specs';
 relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
-
-//return;
 
 describe('CRUD-callback methods', function(){
     this.slow(500);

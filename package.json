@@ -1,7 +1,7 @@
 {
     "name": "relax-component",
     "description": "superagent on a couch",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "dependencies": {
         "url": "*",
         "type-component": "*",

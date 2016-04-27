@@ -9,7 +9,7 @@ components: component.json
 	@component install --dev
 
 relax: components index.js test/node/*.js
-	@component build  --use component-minify\
+	@component build  #--use component-minify\
 		--standalone relax \
 		--out . --name relax.min
 		gzip -c relax.min.js > relax.min.js.gz

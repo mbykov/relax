@@ -1,21 +1,15 @@
 //
-//var express = require('express');
-//var app = express();
-//var url = require('url');
 
 try {
     var Relax = require('relax');
 } catch (err) {
     var Relax = require('../../');
 }
-//var Relax = require('../../');
 
 var relax = new Relax();
 var name = 'relax-specs';
 relax.dbname(name);
 var admin = new Relax('http://admin:kjre4317@localhost:5984');
-
-//return;
 
 describe('VIEW method', function(){
     this.slow(500);
