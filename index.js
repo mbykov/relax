@@ -135,15 +135,13 @@ Relax.prototype.bulk = function(docs, cb) {
     if ('array' != type(docs)) return (cb) ? cb(mess) : new Error(mess);
     var path = this.opts.dbpath + '/_bulk_docs';
     var req = request.post(path).send({docs: docs});
-    // log('RELAX REQ', req);
+
     if (!cb) return req;
     req.end(function(err, res) {
         // FIXME: err
         if (err) {
-            // log('RELAX ERROR', err)
             cb(err, null);
         } else {
-            // log('RELAX RES', res);
             var json = JSON.parse(res.text.trim());
             cb(null, json);
         }
@@ -151,15 +149,12 @@ Relax.prototype.bulk = function(docs, cb) {
 };
 
 Relax.prototype.all = function(cb) {
-    // log('============================ ALL', this.opts.dbpath)
     // var mess = 'docs isnt array';
     // if ('array' != type(doc)) return (cb) ? cb(mess) : new Error(mess);
     var path = this.opts.dbpath + '/_all_docs';
     var req = request.get(path);
-    // log('REQ', req);
     if (!cb) return req;
     req.end(function(err, res) {
-        // log('EEErrr', err, res);
         var json = JSON.parse(res.text.trim());
         (err) ? cb(err, null) : cb(null, json);
     });

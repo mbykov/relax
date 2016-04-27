@@ -5,7 +5,7 @@
     "dependencies": {
         "url": "*",
         "type-component": "*",
-        "superagent": "*",
+        "superagent": "0.21.0",
         "map-component": "*"
     },
     "keywords": [
