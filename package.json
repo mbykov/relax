@@ -5,8 +5,7 @@
     "dependencies": {
         "url": "*",
         "type-component": "*",
-        "superagent": "*",
-        "map-component": "*"
+        "superagent": "2.1.0"
     },
     "keywords": [
         "couchdb",

@@ -1,13 +1,6 @@
 var url = require('url');
 var request = require('superagent');
-
-try {
-    var map = require('map-component');
-    var type = require('type-component');
-} catch (err) {
-    var map = require('map');
-    var type = require('type');
-}
+var type = require('type-component');
 
 module.exports = Relax;
 
@@ -90,7 +83,6 @@ Relax.prototype.get = function(doc, cb) {
     var req = request.get(path);
     if (!cb) return req;
     req.end(function(err, res) {
-        log('ERR', err)
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(null, json);
     });
@@ -140,7 +132,6 @@ Relax.prototype.bulk = function(docs, cb) {
 
     if (!cb) return req;
     req.end(function(err, res) {
-        // FIXME: err
         if (err) {
             cb(err, null);
         } else {
@@ -203,7 +194,7 @@ Relax.prototype.view = function(method, cb) {
     } else {
         var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
     }
-    var req = request.get(path); //.query({limit:10}); // .query({include_docs:true})
+    var req = request.get(path);
     if (!cb) return req;
     req.end(function(err, res) {
         var text = res.text.trim();
@@ -227,7 +218,6 @@ Relax.prototype.postView = function(method, cb) {
         var path = this.opts.dbpath + '/_design/' + parts[0] + '/_view/' + parts[1];
     }
     var req = request.post(path);
-    // req.set('Content-Type', 'application/json') // FIXME: и тут некузяво
     if (!cb) return req;
     req.end(function(err, res) {
         var text = res.text.trim();
@@ -283,7 +273,7 @@ Relax.prototype.uuids = function(count, cb) {
 Relax.prototype.login = function(user, cb) {
     var path = this.opts.server + '/_session';
     var req = request.post(path).send(user);
-    req.set({'Content-Type': 'application/x-www-form-urlencoded'}); // FIXME: и тут некузяво
+    req.set({'Content-Type': 'application/x-www-form-urlencoded'});
     if (!cb) return req;
     req.end(function(err, res) {
         (!err) ? cb(null, JSON.parse(res.text)) : cb(err, null);
@@ -332,7 +322,7 @@ Relax.prototype.frows = function(res) {
 
 Relax.prototype.fdocs = function(res) {
     if (!res.ok) return false;
-    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
+    return JSON.parse(res.text).rows.map(function(row) {return row.doc});
 };
 
 /*
@@ -340,7 +330,7 @@ Relax.prototype.fdocs = function(res) {
  */
 
 function fdocs(res) {
-    return map(JSON.parse(res.text).rows, function(row) {return row.doc});
+    return JSON.parse(res.text).rows.map(function(row) {return row.doc});
 }
 
 
@@ -348,7 +338,7 @@ function merge(a, b) {
     var keys = Object.keys(b);
     keys.forEach(function(key) {
         a[key] = b[key] || a[key];
-    })
+    });
     a.dbname = a.pathname.split('/')[0];
     var auth = (a.auth) ? a.auth+'@' : '';
     a.server = a.protocol+'//'+auth+a.host;
