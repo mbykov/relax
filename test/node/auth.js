@@ -21,8 +21,8 @@ describe('AUTH', function(){
             name = res.uuids[0];
             user = {name: name, password: 'userpass'};
             done();
-        })
-    })
+        });
+    });
 
     describe('cookie authentication', function(){
         it('should sign-up new user', function(done){
@@ -36,6 +36,12 @@ describe('AUTH', function(){
                 done();
             });
         });
+        it('should log-out current user', function(done){
+            relax.logout(function(err, res) {
+                res.ok.should.be.ok;
+                done();
+            });
+        });
         it('should log-in existing user', function(done){
             relax.login(user, function(err, res) {
                 if (res.error) {
@@ -46,7 +52,7 @@ describe('AUTH', function(){
                 }
                 done();
             });
-        })
+        });
         it('should get session info of a current user', function(done){
             relax.session(function(err, res) {
                 res.ok.should.be.ok;
@@ -54,22 +60,22 @@ describe('AUTH', function(){
                 //res.userCtx.name.should.equal(name);
                 done();
             });
-        })
+        });
         it('should log-out current user', function(done){
             relax.logout(function(err, res) {
                 res.ok.should.be.ok;
                 done();
             });
-        })
-        it('should log-in my user back, or next tests fail', function(done){
-            user = {name: 'admin', password: 'kjre4317'};
-            relax.login(user, function(err, res) {
-                res.ok.should.be.ok;
-                done();
-            });
-        })
-    })
+        });
+        // it('should log-in my user back, or next tests fail', function(done){
+        //     user = {name: 'admin', password: 'kjre4317'};
+        //     relax.login(user, function(err, res) {
+        //         res.ok.should.be.ok;
+        //         done();
+        //     });
+        // });
+    });
 
-})
+});
 
 function log () { console.log.apply(console, arguments) }

@@ -1,6 +1,7 @@
 TESTS = test/node/*.js
 #REPORTER = dot
 REPORTER = spec
+g = ''
 
 build: components index.js #test
 	@component build #--dev
@@ -20,6 +21,7 @@ test:
 		--reporter $(REPORTER) \
 		--slow 500 \
 		--timeout 2000 \
+		--grep $(g) \
 		$(TESTS)
 
 couch:

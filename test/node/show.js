@@ -35,59 +35,58 @@ describe('SHOW method', function(){
     before(function(done){
         admin.create('relax-specs', function(err, res){
             done();
-        })
-    })
+        });
+    });
     before(function(done){
         admin.dbname('relax-specs')
             .post(ddoc, function(err, res){
                 done();
             });
-    })
+    });
     before(function(done){
         relax
             .post(doc, function(err, res){
                 done();
             });
-    })
+    });
 
     after(function(done){
         admin.drop('relax-specs', function(err, res){
             done();
-        })
-    })
+        });
+    });
 
     describe('show', function(){
-        it('should show existing doc', function(done){
+        it('should show_existing doc', function(done){
             relax
                 .show('spec/justText')
                 .get(doc)
-                .end(function(res){
-                    log(res.text);
+                .end(function(err, res){
                     res.text.should.equal('just some text');
                     done();
                 });
-        })
+        });
         it('should respond on missing doc', function(done){
             relax
                 .show('spec/justText')
                 .get('missingDoc')
-                .end(function(res){
+                .end(function(err, res){
                     res.status.should.equal(404);
                     res.text.should.equal('no such doc');
                     done();
                 });
-        })
+        });
         it('should respond on missing func', function(done){
             relax
                 .show('spec/justMissingText')
                 .get('missingDoc')
-                .end(function(res){
+                .end(function(err, res){
                     (res.ok == false).should.be.true;
                     JSON.parse(res.text).error.should.equal('not_found');
                     done();
                 });
-        })
-    })
+        });
+    });
 })
 
 function log () { console.log.apply(console, arguments) }

@@ -90,6 +90,7 @@ Relax.prototype.get = function(doc, cb) {
     var req = request.get(path);
     if (!cb) return req;
     req.end(function(err, res) {
+        log('ERR', err)
         var json = JSON.parse(res.text.trim());
         (res.ok) ? cb(null, json) : cb(null, json);
     });
@@ -120,15 +121,16 @@ Relax.prototype.post = function(doc, cb) {
     });
 };
 
-Relax.prototype.del = function(doc, cb) {
-    var path = this.opts.dbpath + '/' + docid(doc);
-    var req = request.del(path).query({rev: docrev(doc)})
-    if (!cb) return req;
-    req.end(function(res) {
-        var json = JSON.parse(res.text.trim());
-        (res.ok) ? cb(null, json) : cb(null, json);
-    });
-}
+// Relax.prototype.del = function(doc, cb) {
+//     var path = this.opts.dbpath + '/' + docid(doc);
+//     var req = request.del(path); //.query({rev: docrev(doc)});
+//     if (!cb) return req;
+//     req.end(function(res) {
+//         if (!res) cb(null, null);
+//         // var json = JSON.parse(res.text.trim());
+//         // (res.ok) ? cb(null, json) : cb(null, json);
+//     });
+// }
 
 Relax.prototype.bulk = function(docs, cb) {
     var mess = 'docs isnt array';
@@ -149,8 +151,6 @@ Relax.prototype.bulk = function(docs, cb) {
 };
 
 Relax.prototype.all = function(cb) {
-    // var mess = 'docs isnt array';
-    // if ('array' != type(doc)) return (cb) ? cb(mess) : new Error(mess);
     var path = this.opts.dbpath + '/_all_docs';
     var req = request.get(path);
     if (!cb) return req;
@@ -283,6 +283,7 @@ Relax.prototype.uuids = function(count, cb) {
 Relax.prototype.login = function(user, cb) {
     var path = this.opts.server + '/_session';
     var req = request.post(path).send(user);
+    req.set({'Content-Type': 'application/x-www-form-urlencoded'}); // FIXME: и тут некузяво
     if (!cb) return req;
     req.end(function(err, res) {
         (!err) ? cb(null, JSON.parse(res.text)) : cb(err, null);
